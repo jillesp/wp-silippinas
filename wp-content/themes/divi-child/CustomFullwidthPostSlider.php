@@ -1,12 +1,12 @@
 <?php
 
-class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBased {
+class ET_Builder_Module_Fullwidth_Post_Slider_Custom extends ET_Builder_Module_Type_PostBased {
 	function init() {
 		$this->name       = esc_html__( 'Custom Post Slider', 'et_builder' );
 		$this->plural     = esc_html__( 'Custom Post Sliders', 'et_builder' );
 		$this->slug       = 'et_pb_post_slider_custom';
 		$this->vb_support = 'on';
-		$this->fullwidth  = false;
+		$this->fullwidth  = true;
 
 		// need to use global settings from the fullwidth slider module
 		$this->global_settings_slug = 'et_pb_slider_custom';
@@ -1145,4 +1145,4 @@ class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBa
 	}
 }
 
-new ET_Builder_Module_Post_Slider_Custom;
+new ET_Builder_Module_Fullwidth_Post_Slider_Custom;
