@@ -108,7 +108,7 @@
                                     </div>
                                 <?php }; ?>  
 
-                                <?php if ( in_category('SilipKainan') || in_category('SilipTulugan') ) { ?>
+                                <?php if ( in_category('SilipKainan') || in_category('SilipTulugan') || in_category('SilipPasyalan') ) { ?>
                                     <div class="slp-knn_images"> 
                                         <?php if(get_post_meta(get_the_ID(), 'wpcf-image-1', true)) {?>
                                             <img src="<?php echo get_post_meta(get_the_ID(), 'wpcf-image-1', true); ?>" />
