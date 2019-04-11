@@ -60,6 +60,7 @@
                          <?php if ( ! post_password_required() ) : ?>
                                 <?php if ( in_category('SilipBalita') ) { ?>
                                 
+                                
                                     <div class="post_meta_custom">
                                         <p>
                                             <!--<strong>By: </strong><?php the_author(); ?> <br/>-->
@@ -108,7 +109,7 @@
                                             <strong>Source: </strong><?php echo (types_render_field('source', array() ));?>
                                         </p>
                                     </div>
-                                <?php }; ?>
+                                <?php }; ?>  
 
                                 <?php 
                                  $thumb = '';

@@ -172,4 +172,3 @@ function prep_custom_modules(){
 }
 
 prep_custom_modules();
-include("singe-post.php");
