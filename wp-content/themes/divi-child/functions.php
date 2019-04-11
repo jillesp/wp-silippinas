@@ -34,7 +34,13 @@ function modify_menu(){
 		foreach ( $categories as $category ) {
 
 			$menu_slug = 'edit.php?s&post_status=all&post_type=post&action=-1&m=0&cat='. $category->term_id . '&filter_action=Filter&paged=1&action2=-1';
-			add_menu_page($category->name, '<span style="'. $cat_styles .'">'. $category->count .'</span>' . $category->name, 'read', $menu_slug, null, $icons[$category->name], 4);
+			
+			if(  $category->name === "Announcements" || $category->name === "More Updates") {
+				add_menu_page($category->name, $category->name, 'read', $menu_slug, null, $icons[$category->name], 3);
+			} else {
+				add_menu_page($category->name, '<span style="'. $cat_styles .'">'. $category->count .'</span>' . $category->name, 'read', $menu_slug, null, $icons[$category->name], 2);
+			}
+			
 			$subcategories = get_categories(array( 'hide_empty' => false, 'parent' => $category->term_id, 'exclude' => array('6')));
 			$submenu_pages = array();
 
@@ -61,6 +67,7 @@ function modify_menu(){
             }
 		};
 }
+
 
 function set_modified_menu( $parent_file ) {
 	global $submenu_file, $current_screen, $pagenow;
@@ -149,6 +156,7 @@ function adminCSS(){
 
 function load_custom_modules(){
 	if(class_exists("ET_Builder_Module")){
+		include("CustomFullwidthPostSlider.php");
 		include("CustomPostSlider.php");
 		include("CustomBlog.php");
 	}
