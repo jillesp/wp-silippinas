@@ -26,7 +26,7 @@
 
     #tabs > div > div {padding: 20px 0;}
 
-    .slp-knn_images > img {display: 'inline-block'; max-width: calc(50% - 4px);}
+    .slp-knn_images > img {display: inline-block; max-width: calc(50% - 4px);}
     
 </style>
 
@@ -108,15 +108,39 @@
                                     </div>
                                 <?php }; ?>  
 
+                                
+                                
+                                <!-- --- -->
+                                
+                                <?php 
+                                 $thumb = '';
+ 
+                                 $width = (int) apply_filters( 'et_pb_index_blog_image_width', 1080 );
+ 
+                                 $height = (int) apply_filters( 'et_pb_index_blog_image_height', 675 );
+                                 $classtext = 'et_featured_image';
+                                 $titletext = get_the_title();
+                                 $thumbnail = get_thumbnail( $width, $height, $classtext, $titletext, $titletext, false, 'Blogimage' );
+                                 $thumb = $thumbnail["thumb"];
+ 
+                                 $post_format = et_pb_post_format();
+ 
+                                 if ( 'video' === $post_format && false !== ( $first_video = et_get_first_video() ) ) {
+                                     printf(
+                                         '<div class="et_main_video_container">
+                                             %1$s
+                                         </div>',
+                                         et_core_esc_previously( $first_video )
+                                     );
+                                 } else if ( ! in_array( $post_format, array( 'gallery', 'link', 'quote' ) ) && 'on' === et_get_option( 'divi_thumbnails', 'on' ) && '' !== $thumb ) {
+                                     print_thumbnail( $thumb, $thumbnail["use_timthumb"], $titletext, $width, $height );
+                                 } else if ( 'gallery' === $post_format ) {
+                                     et_pb_gallery_images();
+                                 }
+                             ?>
+
                                 <?php if ( in_category('SilipKainan') || in_category('SilipTulugan') || in_category('SilipPasyalan') ) { ?>
-                                    <div class="slp-knn_images"> 
-                                        <?php if(get_post_meta(get_the_ID(), 'wpcf-image-1', true)) {?>
-                                            <img src="<?php echo get_post_meta(get_the_ID(), 'wpcf-image-1', true); ?>" />
-                                        <?php }; ?>  
-                                        <?php if(get_post_meta(get_the_ID(), 'wpcf-image-2', true)) {?>
-                                            <img src="<?php echo get_post_meta(get_the_ID(), 'wpcf-image-2', true); ?>" />
-                                        <?php }; ?>  
-                                    </div>
+                                    <?php the_content(); ?>
                                     <div class="slp-knn_content">
                                         <hr/>
                                         <div>
@@ -178,36 +202,15 @@
                                             <?php }; ?>  
                                         </div>
                                     </div>
+                                    <div class="slp-knn_images"> 
+                                        <?php if(get_post_meta(get_the_ID(), 'wpcf-image-1', true)) {?>
+                                            <img src="<?php echo get_post_meta(get_the_ID(), 'wpcf-image-1', true); ?>" />
+                                        <?php }; ?>  
+                                        <?php if(get_post_meta(get_the_ID(), 'wpcf-image-2', true)) {?>
+                                            <img src="<?php echo get_post_meta(get_the_ID(), 'wpcf-image-2', true); ?>" />
+                                        <?php }; ?>  
+                                    </div>
                                 <?php }; ?> 
-                                
-                                <!-- --- -->
-                                
-                                <?php 
-                                 $thumb = '';
- 
-                                 $width = (int) apply_filters( 'et_pb_index_blog_image_width', 1080 );
- 
-                                 $height = (int) apply_filters( 'et_pb_index_blog_image_height', 675 );
-                                 $classtext = 'et_featured_image';
-                                 $titletext = get_the_title();
-                                 $thumbnail = get_thumbnail( $width, $height, $classtext, $titletext, $titletext, false, 'Blogimage' );
-                                 $thumb = $thumbnail["thumb"];
- 
-                                 $post_format = et_pb_post_format();
- 
-                                 if ( 'video' === $post_format && false !== ( $first_video = et_get_first_video() ) ) {
-                                     printf(
-                                         '<div class="et_main_video_container">
-                                             %1$s
-                                         </div>',
-                                         et_core_esc_previously( $first_video )
-                                     );
-                                 } else if ( ! in_array( $post_format, array( 'gallery', 'link', 'quote' ) ) && 'on' === et_get_option( 'divi_thumbnails', 'on' ) && '' !== $thumb ) {
-                                     print_thumbnail( $thumb, $thumbnail["use_timthumb"], $titletext, $width, $height );
-                                 } else if ( 'gallery' === $post_format ) {
-                                     et_pb_gallery_images();
-                                 }
-                             ?>
  
                              <?php
                                  $text_color_class = et_divi_get_post_text_color();
