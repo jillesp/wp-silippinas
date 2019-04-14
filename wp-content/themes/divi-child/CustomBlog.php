@@ -1046,7 +1046,7 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 			$args['cat'] = $include_categories;
 		}
 
-		if ( '' !== $include_regions ) {
+		if ( '' !== $include_regions && is_array($include_regions) ) {
 			$tax_query = array(
 				'taxonomy' => 'region',
 				'field' => 'term_id',
@@ -1055,7 +1055,7 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 			array_push($args['tax_query'], $tax_query);
 		}
 
-		if ( '' !== $include_provinces ) {
+		if ( '' !== $include_provinces && is_array($include_provinces) ) {
 			$tax_query = array(
 				'taxonomy' => 'province',
 				'field' => 'term_id',
