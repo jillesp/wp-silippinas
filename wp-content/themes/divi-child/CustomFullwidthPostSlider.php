@@ -932,75 +932,143 @@ class ET_Builder_Module_Fullwidth_Post_Slider_Custom extends ET_Builder_Module_T
 				$slide_class = 'off' !== $show_image && in_array( $image_placement, array( 'left', 'right' ) ) && has_post_thumbnail() ? ' et_pb_slide_with_image' : '';
 				$slide_class .= 'off' !== $show_image && ! has_post_thumbnail() ? ' et_pb_slide_with_no_image' : '';
 				$slide_class .= " et_pb_bg_layout_{$background_layout}";
-
-				if( array_search( $term_id, $provinces) === FALSE ):
-					array_push($provinces, $term_id);
 			?>
 
-			<div class="et_pb_slide et_pb_media_alignment_center<?php echo esc_attr( $slide_class ); ?>" <?php if ( 'on' !== $parallax && 'off' !== $show_image && 'background' === $image_placement ) { printf( 'style="background-image:url(%1$s)"', esc_url( wp_get_attachment_url( get_post_thumbnail_id() ) ) );  } ?><?php echo et_core_esc_previously( $data_dot_nav_custom_color ); echo et_core_esc_previously( $data_arrows_custom_color ); ?>>
-				<?php if ( 'on' === $parallax && 'off' !== $show_image && 'background' === $image_placement ) { ?>
-					<div class="et_parallax_bg<?php if ( 'off' === $parallax_method ) { echo ' et_pb_parallax_css'; } ?>" style="background-image: url(<?php echo esc_url( wp_get_attachment_url( get_post_thumbnail_id() ) ); ?>);"></div>
-				<?php } ?>
-				<?php if ( 'on' === $use_bg_overlay ) { ?>
-					<div class="et_pb_slide_overlay_container"></div>
-				<?php } ?>
-				<div class="et_pb_container clearfix">
-					<div class="et_pb_slider_container_inner">
-						<?php if ( 'off' !== $show_image && has_post_thumbnail() && ! in_array( $image_placement, array( 'background', 'bottom' ) ) ) { ?>
-							<div class="et_pb_slide_image">
-								<?php the_post_thumbnail(); ?>
-							</div>
-						<?php } ?>
-						<div class="et_pb_slide_description">
-							<?php if ( $is_text_overlay_applied ) : ?><div class="et_pb_text_overlay_wrapper"><?php endif; ?>
-								<<?php echo et_pb_process_header_level( $header_level, 'h2' ) ?> class="et_pb_slide_title"><a href="<?php esc_url( the_permalink() ); ?>"><?php the_title(); ?></a></<?php echo et_pb_process_header_level( $header_level, 'h2' ) ?>>
-								<div class="et_pb_slide_content <?php if ( 'on' !== $show_content_on_mobile ) { echo esc_attr( $hide_on_mobile_class ); } ?>">
-									<?php
-									if ( 'off' !== $show_meta ) {
-										printf(
-											'<p class="post-meta">%1$s | %2$s | %3$s | %4$s</p>',
-											et_get_safe_localization( sprintf( __( 'by %s', 'et_builder' ), '<span class="author vcard">' .  et_pb_get_the_author_posts_link() . '</span>' ) ),
-											et_get_safe_localization( sprintf( __( '%s', 'et_builder' ), '<span class="published">' . esc_html( get_the_date() ) . '</span>' ) ),
-											get_the_category_list(', '),
-											esc_html( sprintf( _nx( '%s Comment', '%s Comments', get_comments_number(), 'number of comments', 'et_builder' ), number_format_i18n( get_comments_number() ) ) )
-										);
-									}
-									?>
-									<?php
-										echo et_core_intentionally_unescaped( $query->posts[ $post_index ]->post_content, 'html' );
-									?>
+			<?php 
+				if( '' === $include_provinces ): 
+					if ( array_search($term_id, $provinces) === FALSE ):
+						array_push($provinces, $term_id);
+			?>
+				<div class="et_pb_slide et_pb_media_alignment_center<?php echo esc_attr( $slide_class ); ?>" <?php if ( 'on' !== $parallax && 'off' !== $show_image && 'background' === $image_placement ) { printf( 'style="background-image:url(%1$s)"', esc_url( wp_get_attachment_url( get_post_thumbnail_id() ) ) );  } ?><?php echo et_core_esc_previously( $data_dot_nav_custom_color ); echo et_core_esc_previously( $data_arrows_custom_color ); ?>>
+					<?php if ( 'on' === $parallax && 'off' !== $show_image && 'background' === $image_placement ) { ?>
+						<div class="et_parallax_bg<?php if ( 'off' === $parallax_method ) { echo ' et_pb_parallax_css'; } ?>" style="background-image: url(<?php echo esc_url( wp_get_attachment_url( get_post_thumbnail_id() ) ); ?>);"></div>
+					<?php } ?>
+					<?php if ( 'on' === $use_bg_overlay ) { ?>
+						<div class="et_pb_slide_overlay_container"></div>
+					<?php } ?>
+					<div class="et_pb_container clearfix">
+						<div class="et_pb_slider_container_inner">
+							<?php if ( 'off' !== $show_image && has_post_thumbnail() && ! in_array( $image_placement, array( 'background', 'bottom' ) ) ) { ?>
+								<div class="et_pb_slide_image">
+									<?php the_post_thumbnail(); ?>
 								</div>
-							<?php if ( $is_text_overlay_applied ) : ?></div><?php endif; ?>
-							<?php
-								// render button
-								$button_classname = array( 'et_pb_more_button' );
+							<?php } ?>
+							<div class="et_pb_slide_description">
+								<?php if ( $is_text_overlay_applied ) : ?><div class="et_pb_text_overlay_wrapper"><?php endif; ?>
+									<<?php echo et_pb_process_header_level( $header_level, 'h2' ) ?> class="et_pb_slide_title"><a href="<?php esc_url( the_permalink() ); ?>"><?php the_title(); ?></a></<?php echo et_pb_process_header_level( $header_level, 'h2' ) ?>>
+									<div class="et_pb_slide_content <?php if ( 'on' !== $show_content_on_mobile ) { echo esc_attr( $hide_on_mobile_class ); } ?>">
+										<?php
+										if ( 'off' !== $show_meta ) {
+											printf(
+												'<p class="post-meta">%1$s | %2$s | %3$s | %4$s</p>',
+												et_get_safe_localization( sprintf( __( 'by %s', 'et_builder' ), '<span class="author vcard">' .  et_pb_get_the_author_posts_link() . '</span>' ) ),
+												et_get_safe_localization( sprintf( __( '%s', 'et_builder' ), '<span class="published">' . esc_html( get_the_date() ) . '</span>' ) ),
+												get_the_category_list(', '),
+												esc_html( sprintf( _nx( '%s Comment', '%s Comments', get_comments_number(), 'number of comments', 'et_builder' ), number_format_i18n( get_comments_number() ) ) )
+											);
+										}
+										?>
+										<?php
+											echo et_core_intentionally_unescaped( $query->posts[ $post_index ]->post_content, 'html' );
+										?>
+									</div>
+								<?php if ( $is_text_overlay_applied ) : ?></div><?php endif; ?>
+								<?php
+									// render button
+									$button_classname = array( 'et_pb_more_button' );
 
-								if ( 'on' !== $show_cta_on_mobile ) {
-									$button_classname[] = $hide_on_mobile_class;
-								}
+									if ( 'on' !== $show_cta_on_mobile ) {
+										$button_classname[] = $hide_on_mobile_class;
+									}
 
-								echo et_core_esc_previously( $this->render_button( array(
-									'button_classname' => $button_classname,
-									'button_custom'    => $button_custom,
-									'button_rel'       => $button_rel,
-									'button_text'      => $more_text,
-									'button_url'       => get_permalink(),
-									'custom_icon'      => $custom_icon,
-									'display_button'   => ( 'off' !== $show_more_button && '' !== $more_text ),
-								) ) );
-							?>
-						</div> <!-- .et_pb_slide_description -->
-						<?php if ( 'off' !== $show_image && has_post_thumbnail() && 'bottom' === $image_placement ) { ?>
-							<div class="et_pb_slide_image">
-								<?php the_post_thumbnail(); ?>
-							</div>
-						<?php } ?>
-					</div>
-				</div> <!-- .et_pb_container -->
-			</div> <!-- .et_pb_slide -->
+									echo et_core_esc_previously( $this->render_button( array(
+										'button_classname' => $button_classname,
+										'button_custom'    => $button_custom,
+										'button_rel'       => $button_rel,
+										'button_text'      => $more_text,
+										'button_url'       => get_permalink(),
+										'custom_icon'      => $custom_icon,
+										'display_button'   => ( 'off' !== $show_more_button && '' !== $more_text ),
+									) ) );
+								?>
+							</div> <!-- .et_pb_slide_description -->
+							<?php if ( 'off' !== $show_image && has_post_thumbnail() && 'bottom' === $image_placement ) { ?>
+								<div class="et_pb_slide_image">
+									<?php the_post_thumbnail(); ?>
+								</div>
+							<?php } ?>
+						</div>
+					</div> <!-- .et_pb_container -->
+				</div> <!-- .et_pb_slide -->
+			<?php 
+					endif;
+				else: 
+			?>
+				<div class="et_pb_slide et_pb_media_alignment_center<?php echo esc_attr( $slide_class ); ?>" <?php if ( 'on' !== $parallax && 'off' !== $show_image && 'background' === $image_placement ) { printf( 'style="background-image:url(%1$s)"', esc_url( wp_get_attachment_url( get_post_thumbnail_id() ) ) );  } ?><?php echo et_core_esc_previously( $data_dot_nav_custom_color ); echo et_core_esc_previously( $data_arrows_custom_color ); ?>>
+					<?php if ( 'on' === $parallax && 'off' !== $show_image && 'background' === $image_placement ) { ?>
+						<div class="et_parallax_bg<?php if ( 'off' === $parallax_method ) { echo ' et_pb_parallax_css'; } ?>" style="background-image: url(<?php echo esc_url( wp_get_attachment_url( get_post_thumbnail_id() ) ); ?>);"></div>
+					<?php } ?>
+					<?php if ( 'on' === $use_bg_overlay ) { ?>
+						<div class="et_pb_slide_overlay_container"></div>
+					<?php } ?>
+					<div class="et_pb_container clearfix">
+						<div class="et_pb_slider_container_inner">
+							<?php if ( 'off' !== $show_image && has_post_thumbnail() && ! in_array( $image_placement, array( 'background', 'bottom' ) ) ) { ?>
+								<div class="et_pb_slide_image">
+									<?php the_post_thumbnail(); ?>
+								</div>
+							<?php } ?>
+							<div class="et_pb_slide_description">
+								<?php if ( $is_text_overlay_applied ) : ?><div class="et_pb_text_overlay_wrapper"><?php endif; ?>
+									<<?php echo et_pb_process_header_level( $header_level, 'h2' ) ?> class="et_pb_slide_title"><a href="<?php esc_url( the_permalink() ); ?>"><?php the_title(); ?></a></<?php echo et_pb_process_header_level( $header_level, 'h2' ) ?>>
+									<div class="et_pb_slide_content <?php if ( 'on' !== $show_content_on_mobile ) { echo esc_attr( $hide_on_mobile_class ); } ?>">
+										<?php
+										if ( 'off' !== $show_meta ) {
+											printf(
+												'<p class="post-meta">%1$s | %2$s | %3$s | %4$s</p>',
+												et_get_safe_localization( sprintf( __( 'by %s', 'et_builder' ), '<span class="author vcard">' .  et_pb_get_the_author_posts_link() . '</span>' ) ),
+												et_get_safe_localization( sprintf( __( '%s', 'et_builder' ), '<span class="published">' . esc_html( get_the_date() ) . '</span>' ) ),
+												get_the_category_list(', '),
+												esc_html( sprintf( _nx( '%s Comment', '%s Comments', get_comments_number(), 'number of comments', 'et_builder' ), number_format_i18n( get_comments_number() ) ) )
+											);
+										}
+										?>
+										<?php
+											echo et_core_intentionally_unescaped( $query->posts[ $post_index ]->post_content, 'html' );
+										?>
+									</div>
+								<?php if ( $is_text_overlay_applied ) : ?></div><?php endif; ?>
+								<?php
+									// render button
+									$button_classname = array( 'et_pb_more_button' );
+
+									if ( 'on' !== $show_cta_on_mobile ) {
+										$button_classname[] = $hide_on_mobile_class;
+									}
+
+									echo et_core_esc_previously( $this->render_button( array(
+										'button_classname' => $button_classname,
+										'button_custom'    => $button_custom,
+										'button_rel'       => $button_rel,
+										'button_text'      => $more_text,
+										'button_url'       => get_permalink(),
+										'custom_icon'      => $custom_icon,
+										'display_button'   => ( 'off' !== $show_more_button && '' !== $more_text ),
+									) ) );
+								?>
+							</div> <!-- .et_pb_slide_description -->
+							<?php if ( 'off' !== $show_image && has_post_thumbnail() && 'bottom' === $image_placement ) { ?>
+								<div class="et_pb_slide_image">
+									<?php the_post_thumbnail(); ?>
+								</div>
+							<?php } ?>
+						</div>
+					</div> <!-- .et_pb_container -->
+				</div> <!-- .et_pb_slide -->
+			<?php endif; ?>
+			
 		<?php
 			$post_index++;
-			endif;
 			} // end while
 
 			// echo "<pre>";
