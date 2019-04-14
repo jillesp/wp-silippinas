@@ -137,19 +137,28 @@ class ET_Builder_Module_Field_Transform extends ET_Builder_Module_Field_Base {
 		);
 
 		//Register responsive options
-		$skip = array(
+		$skip       = array(
 			'type'        => 'skip',
 			'tab_slug'    => $settings['tab_slug'],
 			'toggle_slug' => $settings['toggle_slug'],
 		);
+		$linkedSkip = $skip + array( 'default' => 'on' );
+
 		foreach ( $additional_options['transform_styles']['composite_structure'] as $tab_name => $tab ) {
 			foreach ( $tab['controls'] as $field_name => $field_options ) {
-				$additional_options['transform_styles']['composite_structure'][ $tab_name ]['controls']["${field_name}_tablet"]      = $skip;
-				$additional_options['transform_styles']['composite_structure'][ $tab_name ]['controls']["${field_name}_phone"]       = $skip;
-				$additional_options['transform_styles']['composite_structure'][ $tab_name ]['controls']["${field_name}_last_edited"] = $skip;
+				$controls                              = $additional_options['transform_styles']['composite_structure'][ $tab_name ]['controls'];
+				$controls["${field_name}_tablet"]      = $skip;
+				$controls["${field_name}_phone"]       = $skip;
+				$controls["${field_name}_last_edited"] = $skip;
+				if ( in_array( $field_name, array( 'transform_scale', 'transform_translate', 'transform_skew' ) ) ) {
+					$controls["${field_name}_linked"]        = $linkedSkip;
+					$controls["${field_name}_linked_tablet"] = $linkedSkip;
+					$controls["${field_name}_linked_phone"]  = $linkedSkip;
+					$controls["${field_name}_linked__hover"] = $linkedSkip;
+				}
+				$additional_options['transform_styles']['composite_structure'][ $tab_name ]['controls'] = $controls;
 			}
 		}
-
 		$additional_options['transform_styles_last_edited'] = $skip;
 
 		return $additional_options;
@@ -211,7 +220,7 @@ class ET_Builder_Module_Field_Transform extends ET_Builder_Module_Field_Base {
 		}
 
 		$valueArray = explode( '|', $optionValue );
-		$value = $valueArray[ $index ];
+		$value      = $valueArray[ $index ];
 
 		if ( 'scale' === $typeAxis[0] ) {
 			return $this->percent_to_unit( $value );

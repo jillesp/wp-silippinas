@@ -5,7 +5,7 @@ window.wp = window.wp || {};
 /**
  * The builder version and product name will be updated by grunt release task. Do not edit!
  */
-window.et_builder_version = '3.21.2';
+window.et_builder_version = '3.22.1';
 window.et_builder_product_name = 'Divi';
 
 ( function($) {
@@ -15777,7 +15777,7 @@ window.et_builder_product_name = 'Divi';
 					number,
 					length;
 
-				if ( range_input_value === '' && ! initial_value_set ) {
+				if (isNaN(parseFloat(range_input_value)) && ! initial_value_set) {
 					$this_el.val( 0 );
 					$range_input.data( 'initial_value_set', true );
 
@@ -15864,7 +15864,6 @@ window.et_builder_product_name = 'Divi';
 				$validate_unit_field.each( function() {
 					var $this_el = $(this),
 						value    = et_pb_sanitize_input_unit_value( $.trim( $this_el.val() ) );
-
 					$this_el.val( value );
 				} );
 			}
@@ -16469,6 +16468,7 @@ window.et_builder_product_name = 'Divi';
 				range_processed = typeof range_value === 'string' ? range_value.trim() : range_value,
 				range_digit     = parseFloat( range_processed ),
 				range_string    = range_processed.toString().replace( range_digit, '' ),
+				range_default   = $range_field.data('default'),
 				result;
 
 			// no need to use Number.isNaN there. parseFloat guarantees that we have a number or `NaN` value at this point.
@@ -16489,7 +16489,7 @@ window.et_builder_product_name = 'Divi';
 				}
 			}
 
-			result = range_digit.toString() + range_string;
+			result = (range_digit.toString() + range_string) || range_default;
 
 			if ( update_element_value && result !== range_value ) {
 				$range_input.val( result );
@@ -16526,6 +16526,10 @@ window.et_builder_product_name = 'Divi';
 			var default_value = et_pb_get_default_setting_value($element).toLowerCase();
 			var current_value = _.isUndefined(ET_PageBuilder.Helpers.getSettingValue($element)) ? '' : ET_PageBuilder.Helpers.getSettingValue($element).toString().toLowerCase();
 			var is_range_option  = $element.hasClass('et-pb-range');
+
+			if (undefined === current_value || '' === String(current_value)) {
+				return true;
+			}
 
 			if ($element.is('select')  && default_value === '' && $element.prop('selectedIndex') === 0) {
 				return true;
@@ -16775,7 +16779,7 @@ window.et_builder_product_name = 'Divi';
 			}
 
 			if( isNaN( parseFloat( value ) ) ) {
-				return '';
+				return value;
 			}
 
 			result = parseFloat( value );

@@ -311,6 +311,7 @@ class ET_Builder_Module_Portfolio extends ET_Builder_Module_Type_PostBased {
 		$fields = parent::get_transition_fields_css_props();
 
 		$fields['max_width'] = array( 'max-width' => '%%order_class%%, %%order_class%% .et_pb_portfolio_item' );
+		$fields['width']     = array( 'width' => '%%order_class%%, %%order_class%% .et_pb_portfolio_item' );
 
 		return $fields;
 	}

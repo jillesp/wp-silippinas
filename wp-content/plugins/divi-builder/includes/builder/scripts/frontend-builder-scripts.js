@@ -1401,6 +1401,10 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				$et_lightbox_image.bind( 'click' );
 
 				window.et_pb_image_lightbox_init = function( $et_lightbox_image ) {
+					// Delay the initialization if magnificPopup hasn't finished loading yet.
+					if (!$et_lightbox_image.magnificPopup) {
+						return jQuery(window).on('load', function() {window.et_pb_image_lightbox_init($et_lightbox_image);});
+					}
 					$et_lightbox_image.magnificPopup( {
 						type: 'image',
 						removalDelay: 500,
@@ -4999,13 +5003,20 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 					$.proxy( et_calc_fullscreen_section, $( this ) )();
 				});
 
-				$et_window.off('resize', et_calculate_fullscreen_section_size);
-				$et_window.off('et-pb-header-height-calculated', et_calculate_fullscreen_section_size);
+				clearTimeout(et_calc_fullscreen_section.timeout);
 
-				$et_window.trigger('resize');
+				et_calc_fullscreen_section.timeout = setTimeout(function () {
+					$et_window.off('resize', et_calculate_fullscreen_section_size);
+					$et_window.off('et-pb-header-height-calculated', et_calculate_fullscreen_section_size);
 
-				$et_window.on('resize', et_calculate_fullscreen_section_size);
-				$et_window.on('et-pb-header-height-calculated', et_calculate_fullscreen_section_size);
+					$et_window.trigger('resize');
+
+					$et_window.on('resize', et_calculate_fullscreen_section_size);
+					$et_window.on('et-pb-header-height-calculated', et_calculate_fullscreen_section_size);
+				}, 100);
+				// 100ms timeout is set to make sure that the fulls screen section size is calculated
+				// This allows the posibility that in some specific cases this may not be enought
+				// so we may need to review this.
 			};
 
 			if (!is_frontend_builder) {

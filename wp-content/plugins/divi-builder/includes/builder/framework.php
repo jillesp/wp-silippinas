@@ -4,6 +4,7 @@ require_once ET_BUILDER_DIR . 'core.php';
 require_once ET_BUILDER_DIR . 'feature/ClassicEditor.php';
 require_once ET_BUILDER_DIR . 'feature/post-content.php';
 require_once ET_BUILDER_DIR . 'feature/dynamic-content.php';
+require_once ET_BUILDER_DIR . 'feature/ErrorReport.php';
 require_once ET_BUILDER_DIR . 'api/DiviExtensions.php';
 
 if ( wp_doing_ajax() && ! is_customize_preview() ) {
@@ -46,6 +47,7 @@ if ( wp_doing_ajax() && ! is_customize_preview() ) {
 			'et_builder_resolve_post_content',
 			'et_builder_activate_bfb_auto_draft',
 			'et_builder_toggle_bfb',
+			'et_fb_error_report',
 		),
 	);
 

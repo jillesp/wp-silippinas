@@ -540,7 +540,7 @@ if ( ! function_exists( 'et_core_noconflict_styles_gform' ) ) :
 /**
  * Register Core styles with Gravity Forms so that they're enqueued when running on no-conflict mode
  *
- * @since ??
+ * @since 3.21.2
  *
  * @param $styles
  *
@@ -558,7 +558,7 @@ if ( ! function_exists( 'et_core_noconflict_scripts_gform' ) ) :
 /**
  * Register Core scripts with Gravity Forms so that they're enqueued when running on no-conflict mode
  *
- * @since ??
+ * @since 3.21.2
  *
  * @param $scripts
  *

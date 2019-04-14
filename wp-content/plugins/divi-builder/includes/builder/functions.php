@@ -1,8 +1,10 @@
 <?php
 
+require_once 'module/helpers/Overflow.php';
+
 if ( ! defined( 'ET_BUILDER_PRODUCT_VERSION' ) ) {
 	// Note, this will be updated automatically during grunt release task.
-	define( 'ET_BUILDER_PRODUCT_VERSION', '3.21.2' );
+	define( 'ET_BUILDER_PRODUCT_VERSION', '3.22.1' );
 }
 
 if ( ! defined( 'ET_BUILDER_VERSION' ) ) {
@@ -1830,6 +1832,18 @@ endif;
  */
 function et_builder_get_acceptable_css_string_values( $property = 'all' ) {
 	$acceptable_strings = apply_filters( 'et_builder_acceptable_css_string_values', array(
+		'width' => array(
+			'auto',
+			'inherit',
+			'initial',
+			'unset',
+		),
+		'max-width' => array(
+			'none',
+			'inherit',
+			'initial',
+			'unset',
+		),
 		'margin' => array(
 			'auto',
 			'inherit',
@@ -1837,6 +1851,24 @@ function et_builder_get_acceptable_css_string_values( $property = 'all' ) {
 			'unset',
 		),
 		'padding' => array(
+			'inherit',
+			'initial',
+			'unset',
+		),
+		'height' => array(
+			'auto',
+			'inherit',
+			'initial',
+			'unset',
+		),
+		'min-height' => array(
+			'auto',
+			'inherit',
+			'initial',
+			'unset',
+		),
+		'max-height' => array(
+			'none',
 			'inherit',
 			'initial',
 			'unset',
@@ -2349,6 +2381,7 @@ add_action( 'wp_enqueue_scripts', 'et_builder_preprint_font' );
 
 if ( ! function_exists( 'et_pb_get_page_custom_css' ) ) :
 function et_pb_get_page_custom_css() {
+	$overflow         = et_pb_overflow();
 	$page_id          = apply_filters( 'et_pb_page_id_custom_css', get_the_ID() );
 	$exclude_defaults = true;
 	$page_settings    = ET_Builder_Settings::get_values( 'page', $page_id, $exclude_defaults );
@@ -2389,6 +2422,25 @@ function et_pb_get_page_custom_css() {
 		$output .= sprintf(
 			'%2$s .et_pb_section { background-color: %1$s; }',
 			esc_html( $page_settings['et_pb_section_background_color'] ),
+			esc_html( $selector_prefix )
+		);
+	}
+
+	$overflow_x = $overflow->get_value_x( $page_settings, '', 'et_pb_' );
+	$overflow_y = $overflow->get_value_y( $page_settings, '', 'et_pb_' );
+
+	if ( ! empty( $overflow_x ) ) {
+		$output .= sprintf(
+			'%2$s .et_builder_inner_content { overflow-x: %1$s; }',
+			esc_html( $overflow_x ),
+			esc_html( $selector_prefix )
+		);
+	}
+
+	if ( ! empty( $overflow_y ) ) {
+		$output .= sprintf(
+			'%2$s .et_builder_inner_content { overflow-y: %1$s; }',
+			esc_html( $overflow_y ),
 			esc_html( $selector_prefix )
 		);
 	}
@@ -2940,7 +2992,8 @@ function et_pb_before_main_editor( $post ) {
 		);
 
 		// add in the visual builder button only on appropriate post types
-		if ( et_builder_fb_enabled_for_post( $post->ID ) && et_pb_is_allowed( 'use_visual_builder' ) && ! et_is_extra_library_layout( $post->ID ) ) {
+		// also, don't add the button on page if it set as static posts page
+		if ( et_builder_fb_enabled_for_post( $post->ID ) && et_pb_is_allowed( 'use_visual_builder' ) && ! et_is_extra_library_layout( $post->ID ) && $post->ID !== get_option( 'page_for_posts' ) ) {
 			$buttons .= sprintf('<a href="%1$s" id="et_pb_fb_cta" class="button button-primary button-large%3$s%4$s">%2$s</a>',
 				esc_url( et_fb_get_vb_url() ),
 				esc_html__( 'Build On The Front End', 'et_builder' ),
@@ -3183,175 +3236,14 @@ function et_pb_fix_builder_shortcodes( $content ) {
 }
 add_filter( 'the_content', 'et_pb_fix_builder_shortcodes' );
 
-/**
- * Parse shortcode to prepare its argument list
- * @see do_shortcode()
- *
- * @since 3.20
- *
- * @param string $content
- *
- * @return string prepared $content
- */
-function et_pb_prepare_module_shortcode_tags( $content ) {
-	// Get module slugs (shortcode tags) of current post type
-	$module_slugs = ET_Builder_Element::get_module_slugs_by_post_type( get_post_type() );
 
-	// Find all registered tag names in $content.
-	preg_match_all( '@\[([^<>&/\[\]\x00-\x20=]++)@', $content, $matches );
-
-	$tagnames = array_intersect( $module_slugs, $matches[1] );
-
-	// Get regex of current module slug
-	$pattern = get_shortcode_regex( $tagnames );
-
-	// Parse content and filter its shortcode argument list
-	$content = preg_replace_callback( "/$pattern/", 'et_pb_prepare_module_shortcode_attrs', $content );
-
-	return $content;
-}
-
-/**
- * Callback for matching result of et_pb_prepare_module_shortcode_tags() which also recursively call
- * et_pb_prepare_module_shortcode_tags() to prepare argument list from section to module item level
- *
- * @since 3.20
- *
- * @param array $matches {
- *     shortcode which has been parsed against module regex pattern
- *
- *     @type string [0] Current module's shortcode layout that is being parsed against regex
- *     @type string [1] Empty string (for general shortcode, this is used for extra [ to allow
- *                      for escaping shortcodes with double [[]] )
- *     @type string [2] Shortcode name
- *     @type string [3] Shortcode argument list
- *     @type string [4] Empty string (for general shortcode, this is used for self closing /)
- *     @type string [5] Current module's content shortcode layout
- *     @type string [6] Empty string (for general shortcode, this is used for extra ] to allow for
- *                      escaping shortcodes with double [[]])
- * }
- */
-function et_pb_prepare_module_shortcode_attrs( $matches ) {
-	// Get list of module slugs which do not contain other module inside of its content such as
-	// parent / structure modules: all modules - structure module - parent module (exist on
-	// get_child_slugs returned array keys)
-	static $childless_module_slugs = array();
-	$post_type                     = get_post_type();
-
-	if ( empty( $childless_module_slugs ) ) {
-		$childless_module_slugs = array_diff(
-			ET_Builder_Element::get_module_slugs_by_post_type( $post_type ),
-			ET_Builder_Element::get_structure_module_slugs( true ),
-			array_keys( ET_Builder_Element::get_child_slugs( $post_type, true ) )
-		);
-	}
-
-	$content_has_module     = ! in_array( $matches[2], $childless_module_slugs );
-	$module_content         = $matches[5];
-	$content_is_dynamic     = ! $content_has_module && preg_match( '/_dynamic_attributes="[^"]*content[^"]*"/', $matches[3] );
-
-	if ( $content_is_dynamic ) {
-		$decoded_content = json_decode( $module_content );
-
-		// Legacy dynamic shortcode content might containt faulty character (`<` without closing `>`
-		// or `>` without leading `<`) on settings.before / settings.after serialized json which
-		// might cause wp_html_split() incorrectly parse the string and breaks shortcode rendering.
-		// Convert legacy dynamic shortcode into new encoded format because it will encode the faulty
-		// character which avoid the error to occur
-		if ( is_object( $decoded_content ) ) {
-			$module_content = et_builder_serialize_dynamic_content(
-				$decoded_content->dynamic,
-				$decoded_content->content,
-				$decoded_content->settings
-			);
-		}
-	}
-
-	// Append shortcode content which its content has no module (ie. et_pb_cta, et_pb_slide) shortcode
-	// by HTML comment to avoid unclosed HTML like content (ie unclosed `<`) being incorrectly parsed
-	// by wp_html_split() inside do_shortcodes_in_html_tags() inside do_shortcode(). Skip this if
-	// module uses dynamic content because it'll be processed later
-	if ( ! $content_has_module && '' !== $module_content && ! $content_is_dynamic  ) {
-		$module_content = sprintf( '%1$s<!-- et_pb_content_end -->', et_core_esc_previously( $module_content ) );
-	}
-
-	// Return prepared shortcode layout
-	return '['.$matches[2] . et_pb_prepare_module_shortcode_argument_list( $matches[3] ) . ']'
-		. et_pb_prepare_module_shortcode_tags( $module_content )
-	.'[/'.$matches[2].']';
-}
-
-/**
- * Filter & format shortcode argument list so it is ready for WordPress default formatting
- * @see get_shortcode_regex()
- *
- * @since 3.20
- *
- * @param string  argument list
- *
- * @return string prepared argument list
- */
-function et_pb_prepare_module_shortcode_argument_list ( $argument_list = '' ) {
-	// Regex pattern for capturing argument list that is being texturized by wptexturize. Generally,
-	// attribute value that contains `<` character with no closing `>` and `>` which isn't started
-	// by `<` fail the shortcode check which make the argument list ends up being texturized by
-	// WordPress' wptexturize filter.
-
-	$regex = '/(?<==\")'        // Positive look behind; Exclude equal sign and opening double quote
-		.'(?:'                  // Non-capturing group
-			.'([^<"]*?>[^"]*?)' // `>` with no opening `<`
-			.'|'                //
-			.'([^"]*?<+[^>"]*)' // `<` with no closing `>`
-			.'|'
-			.'([^"]*?<[^\/"]*?>[^<"]*>[^"]*?)' // `< > >` structure and its variation
-		.')'                    //
-	.'(?=\")/';                 // Positive look ahead; Exclude closing double quote
-
-	$argument_list = preg_replace_callback( $regex, 'et_pb_prepare_escape_attribute_value', $argument_list );
-
-	return $argument_list;
-}
-
-/**
- * Callback for replacing attribute value which matches et_pb_prepare_module_shortcode_argument_list()
- * pattern with its escaped value
- *
- * @since 3.20
- *
- * @param array $matches substring which matches et_pb_prepare_module_shortcode_argument_list() regex
- *
- * @return string escaped string of matched value
- */
-function et_pb_prepare_escape_attribute_value( $matches ) {
-	// Only need to escape the first array element as it contains the match info of the regex pattern
-	return esc_attr( $matches[0] );
-}
-
-/**
- * Prepare builder's post_content so WordPress' default formatting won't unexpectedly change the output
- *
- * @since 3.17.3
- * @since 3.20 renamed et_pb_the_content_prep_code_module_for_wpautop() into et_pb_the_content_preparation()
- *
- * @param string $content
- *
- * @return string formatted $content
- */
-function et_pb_the_content_preparation( $content ) {
+function et_pb_the_content_prep_code_module_for_wpautop( $content ) {
 	if ( is_singular() && 'on' === get_post_meta( get_the_ID(), '_et_pb_use_builder', true ) ) {
 		$content = et_pb_prep_code_module_for_wpautop( $content );
-
-		// WordPress' wptexturize filter is called before do_shortcode and might unexpectedly
-		// escape shortcode argument list (ie. ` title="Your Title Here >"`) if its attribute value
-		// contains unclosed `<` and `>` which isn't opened by `<`. This causes shortcode parser
-		// incorrectly parse the argument list which ends up rendering broken module output.
-		// Thus, builder needs to escape the "bad" attribute value first
-		$content = et_pb_prepare_module_shortcode_tags( $content );
 	}
-
 	return $content;
 }
-add_filter( 'the_content', 'et_pb_the_content_preparation', 0 );
+add_filter( 'the_content', 'et_pb_the_content_prep_code_module_for_wpautop', 0 );
 
 // generate the html for "Add new template" Modal in Library
 if ( ! function_exists( 'et_pb_generate_new_layout_modal' ) ) {
@@ -4671,7 +4563,18 @@ function et_pb_pagebuilder_meta_box() {
 			'nonce' => wp_create_nonce( 'et_builder_toggle_bfb' ),
 		), admin_url( 'admin-ajax.php' ) );
 
-		$bfb_url = et_core_intentionally_unescaped( et_fb_get_bfb_url(), 'fixed_string' );
+		$new_page_url = false;
+		$is_new_page  = false;
+		$edit_page_id = get_the_ID();
+
+		// Polylang creates copy of page and BFB should be loaded on page which is not saved yet and cannot be loaded on FE
+		// Therefore load the homepage and replace the content for BFB to make it load with content from other post
+		if ( 'add' === get_current_screen()->action || $edit_page_id === (int) get_option( 'page_for_posts' ) ) {
+			$new_page_url = get_home_url();
+			$is_new_page = true;
+		}
+
+		$bfb_url = et_core_intentionally_unescaped( et_fb_get_bfb_url( $new_page_url, $is_new_page, $edit_page_id ), 'fixed_string' );
 
 		if ( is_ssl() && 0 === strpos( $bfb_url, 'http://' ) ) {
 			// If Admin is SSL but FE is not, we need to fix BFB url or it won't work
@@ -4688,7 +4591,6 @@ function et_pb_pagebuilder_meta_box() {
 					var iframe = document.body.appendChild(document.createElement('iframe'));
 
 					iframe.id        = 'et-bfb-app-frame';
-					iframe.src       = '{$bfb_url}';
 
 					document.body.classList.add('et-db');
 					document.body.classList.add('et-bfb');
@@ -4701,6 +4603,7 @@ function et_pb_pagebuilder_meta_box() {
 						jQuery('#wpwrap').wrap(outer);
 
 						jQuery('#et-bfb-app-frame').appendTo('#et_pb_layout .et_divi_builder');
+					    iframe.src = '{$bfb_url}';
 
 						// Add first-visible classname to first visible metabox on #normal-sortables
 						jQuery('#et_pb_layout')
@@ -6860,6 +6763,10 @@ function et_pb_builder_settings_hidden_inputs( $post_id ) {
 		return;
 	}
 
+	if ( empty( $settings ) ) {
+		return;
+	}
+
 	foreach ( $settings as $setting ) {
 		$setting = wp_parse_args( $setting, $defaults );
 
@@ -8216,7 +8123,7 @@ function et_pb_generate_responsive_css( $values_array, $css_selector, $css_prope
 					$declaration .= sprintf(
 						'%1$s: %2$s%3$s',
 						$this_property,
-						esc_html( et_builder_process_range_value( $this_value ) ),
+						esc_html( et_builder_process_range_value( $this_value, $this_property ) ),
 						'' !== $additional_css ? $additional_css : ';'
 					);
 				}
@@ -8224,7 +8131,7 @@ function et_pb_generate_responsive_css( $values_array, $css_selector, $css_prope
 				$declaration = sprintf(
 					'%1$s: %2$s%3$s',
 					$css_property,
-					esc_html( et_builder_process_range_value( $current_value ) ),
+					esc_html( et_builder_process_range_value( $current_value, $css_property ) ),
 					'' !== $additional_css ? $additional_css : ';'
 				);
 			}
@@ -8603,6 +8510,15 @@ function et_fb_process_imported_content() {
 add_action( 'wp_ajax_et_fb_process_imported_content', 'et_fb_process_imported_content' );
 
 function et_fb_maybe_get_bfb_initial_content( $content, $post_id ) {
+	 if ( isset( $_GET['from_post'] ) && 'empty' !== $_GET['from_post'] ) {
+		$copy_content_from = get_post( $_GET['from_post'] );
+		$existing_content  = $copy_content_from->post_content;
+
+		if ( '' !== $existing_content && has_shortcode( $existing_content, 'et_pb_section' ) ) {
+			return $existing_content;
+		}
+	}
+
 	// process the content only for BFB
 	if ( ! et_builder_bfb_enabled() ) {
 		return $content;
@@ -9073,9 +8989,7 @@ function et_fb_process_shortcode( $content, $parent_address = '', $global_parent
 			$global_parent_type = '';
 		}
 
-		// Prepare argument list before parsing it using shortcode_parse_attr() because the function
-		// rejects attribute value which contains unclosed HTML tag-like value
-		$attr = shortcode_parse_atts( et_pb_prepare_module_shortcode_argument_list( $match[3] ) );
+		$attr = shortcode_parse_atts( $match[3] );
 
 		if ( ! is_array( $attr ) ) {
 			$attr = array();
@@ -9682,6 +9596,20 @@ function et_builder_get_shortcuts( $on = 'fb' ) {
 					'fb',
 				),
 			),
+			'increase_padding_module' => array(
+				'kbd'  => array( 'm', array( 'left', 'right', 'up', 'down' ) ),
+				'desc' => esc_html__( 'Increase Module Padding', 'et_builder' ),
+				'on' => array(
+					'fb',
+				),
+			),
+			'decrease_padding_module' => array(
+				'kbd'  => array( 'm', 'alt', array( 'left', 'right', 'up', 'down' ) ),
+				'desc' => esc_html__( 'Decrease Module Padding', 'et_builder' ),
+				'on' => array(
+					'fb',
+				),
+			),
 			'increase_padding_row_10' => array(
 				'kbd'  => array( 'r', 'shift', array( 'left', 'right', 'up', 'down' ) ),
 				'desc' => esc_html__( 'Increase Row Padding By 10px', 'et_builder' ),
@@ -9706,6 +9634,20 @@ function et_builder_get_shortcuts( $on = 'fb' ) {
 			'decrease_padding_section_10' => array(
 				'kbd'  => array( 's', 'alt', 'shift', array( 'left', 'right', 'up', 'down' ) ),
 				'desc' => esc_html__( 'Decrease Section Padding By 10px', 'et_builder' ),
+				'on' => array(
+					'fb',
+				),
+			),
+			'increase_padding_module_10' => array(
+				'kbd'  => array( 'm', 'shift', array( 'left', 'right', 'up', 'down' ) ),
+				'desc' => esc_html__( 'Increase Module Padding By 10px', 'et_builder' ),
+				'on' => array(
+					'fb',
+				),
+			),
+			'decrease_padding_module_10' => array(
+				'kbd'  => array( 'm', 'alt', 'shift', array( 'left', 'right', 'up', 'down' ) ),
+				'desc' => esc_html__( 'Decrease Module Padding By 10px', 'et_builder' ),
 				'on' => array(
 					'fb',
 				),
@@ -10054,3 +9996,36 @@ function et_builder_is_hover_enabled( $setting, $props ) {
 	return et_pb_hover_options()->is_enabled( $setting, $props );
 }
 endif;
+
+if ( ! function_exists( 'et_builder_add_prefix' ) ) {
+	/**
+	 * Prefixes a string key with a prefix string using the provided delimiter
+	 * In case the prefix is empty, original key is returned
+	 *
+	 * @param string $prefix
+	 * @param string $key
+	 * @param string $delimiter
+	 *
+	 * @return string
+	 */
+	function et_builder_add_prefix( $prefix, $key, $delimiter = '_' ) {
+		return $prefix === '' ? $key : $prefix . $delimiter . $key;
+    }
+}
+
+if ( ! function_exists( 'et_builder_module_prop' ) ) {
+	/**
+	 * Returns props value by provided key, if the value is empty, returns the default value
+	 *
+	 * @param string $prop
+	 * @param array $props
+	 * @param mixed $default
+	 *
+	 * @return mixed|null
+	 */
+	function et_builder_module_prop( $prop, $props, $default ) {
+		$value = et_()->array_get( $props, $prop );
+
+		return null === $value || '' === $value ? $default : $value;
+    }
+}

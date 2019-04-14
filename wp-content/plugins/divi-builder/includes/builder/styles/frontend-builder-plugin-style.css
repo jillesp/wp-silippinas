@@ -2149,7 +2149,6 @@
 @media all and (min-width: 981px) {
   .et-db #et-boc {
     /* Fluid Grid */
-    /* Fullwidth Rows */
     /* Grid Layouts: Gallery, Portfolio, Filterable Portfolio, Shop */
   }
   .et-db #et-boc .et_pb_gutters3,
@@ -6652,27 +6651,6 @@
   .et_pb_column_1_2 .et_pb_row_inner.et-db #et-boc .rtl .et_pb_gutters1 .et_pb_column_4_4 .et_pb_blog_grid .column.size-1of1 {
     margin-left: 0;
   }
-  .et-db #et-boc .et_pb_gutters4.et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_gutters4 .et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_specialty_fullwidth > .et_pb_gutters4.et_pb_row,
-  .et-db #et-boc .et_pb_gutters4 .et_pb_specialty_fullwidth > .et_pb_row {
-    width: 86% !important;
-    max-width: 86% !important;
-  }
-  .et-db #et-boc .et_pb_gutters2.et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_gutters2 .et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_specialty_fullwidth > .et_pb_gutters2.et_pb_row,
-  .et-db #et-boc .et_pb_gutters2 .et_pb_specialty_fullwidth > .et_pb_row {
-    width: 94% !important;
-    max-width: 94% !important;
-  }
-  .et-db #et-boc .et_pb_gutters1.et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_gutters1 .et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_specialty_fullwidth > .et_pb_gutters1.et_pb_row,
-  .et-db #et-boc .et_pb_gutters1 .et_pb_specialty_fullwidth > .et_pb_row {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
   .et-db #et-boc .et_pb_gutters1 .et_pb_portfolio_grid .et_pb_grid_item h2:last-child,
   .et-db #et-boc .et_pb_gutters1 .et_pb_portfolio_grid .et_pb_grid_item .et_pb_module_header:last-child {
     line-height: normal;
@@ -6796,9 +6774,6 @@
   .et-db #et-boc .et_pb_row_1-6_1-6_1-6_1-6 > .et_pb_column.et_pb_column_1_6 .et_pb_shop_grid .woocommerce ul.products li.product {
     margin: 0 0 11.5% 0;
     width: 100%;
-  }
-  .et-db #et-boc .et_pb_gutters1 {
-    /* Fullwidth Rows */
   }
   .et-db #et-boc .et_pb_gutters1 .et_pb_column,
   .et-db #et-boc .et_pb_gutters1.et_pb_row .et_pb_column {
@@ -6993,14 +6968,6 @@
   .et-db #et-boc .et_pb_gutters1.et_pb_row_1-6_1-6_1-6_1-6 > .et_pb_column.et_pb_column_1_6 .et_pb_shop_grid .woocommerce ul.products li.product {
     margin: 0;
     width: 100%;
-  }
-  .et-db #et-boc .et_pb_gutters1.et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_gutters1 .et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_gutters1.et_pb_specialty_fullwidth > .et_pb_row,
-  .et_pb_specialty_fullwidth > .et-db #et-boc .et_pb_gutters1.et_pb_row,
-  .et-db #et-boc .et_pb_gutters1 .et_pb_specialty_fullwidth > .et_pb_row {
-    width: 100% !important;
-    max-width: 100% !important;
   }
   .et-db #et-boc .rtl .et_pb_column .et_pb_blog_grid .column.size-1of2,
   .et-db #et-boc .rtl .et_pb_column .et_pb_widget {
@@ -13318,7 +13285,6 @@
 @media all and (min-width: 981px) {
   .et-db #et-boc {
     /* Sections and Rows */
-    /* Fullwidth Rows */
     /* Equalize Column Heights */
     /* Modify column's order in equalize column row so clearfix is displayed early and its
      actual width (0px) remains to avoid unwanted window's unwanted horizontal scroll */
@@ -13380,11 +13346,6 @@
   .et-db #et-boc .et_pb_row_inner .et_pb_column:last-child,
   .et-db #et-boc .et_pb_row_inner .et_pb_column.et-last-child {
     margin-right: 0 !important;
-  }
-  .et-db #et-boc .et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_specialty_fullwidth > .et_pb_row {
-    width: 89% !important;
-    max-width: 89% !important;
   }
   .et-db #et-boc .et_pb_row.et_pb_equal_columns,
   .et-db #et-boc .et_pb_row_inner.et_pb_equal_columns,
@@ -13751,7 +13712,6 @@
     /* Rows and Sections */
     /* Sticky Image */
     /* Responsive Columns Breakdown */
-    /* Fullwidth Rows */
     /* Filterable Portfolio Module */
     /* Blog + Sidebar Module + Footer */
     /* Slider Module */
@@ -13936,11 +13896,6 @@
   }
   .et-db #et-boc .et_pb_row_1-6_1-6_1-6_1-6:nth-last-child(-n+3) {
     margin-bottom: 0;
-  }
-  .et-db #et-boc .et_pb_row.et_pb_row_fullwidth,
-  .et-db #et-boc .et_pb_specialty_fullwidth > .et_pb_row {
-    width: 80% !important;
-    max-width: 80% !important;
   }
   .et-db #et-boc .et_pb_space.et-hide-mobile {
     display: none;

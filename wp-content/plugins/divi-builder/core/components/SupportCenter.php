@@ -203,6 +203,9 @@ class ET_Support_Center {
 		// Make sure that our Support Account's roles are set up
 		add_filter( 'add_et_builder_role_options', array( $this, 'support_user_add_role_options' ), 10, 1 );
 
+		// On Multisite installs, grant `unfiltered_html` capabilities to the Support User
+		add_filter( 'map_meta_cap', array( $this, 'support_user_map_meta_cap' ), 1, 3 );
+
 		// Add CSS class name(s) to the Support Center page's body tag
 		add_filter( 'admin_body_class', array( $this, 'add_admin_body_class_name' ) );
 
@@ -227,6 +230,9 @@ class ET_Support_Center {
 		add_action( $this->support_user_cron_name, array( $this, 'support_user_cron_maybe_delete_account' ) );
 		add_action( 'init', array( $this, 'support_user_maybe_delete_expired_account' ) );
 		add_action( 'admin_init', array( $this, 'support_user_maybe_delete_expired_account' ) );
+
+		// Remove KSES filters for ET Support User
+		add_action( 'admin_init', array( $this, 'support_user_kses_remove_filters' ) );
 
 		// Update Support User settings via AJAX
 		add_action( 'wp_ajax_et_support_user_update', array( $this, 'support_user_update_via_ajax' ) );
@@ -1374,6 +1380,7 @@ class ET_Support_Center {
 	/**
 	 * Define both Standard and Elevated roles for the Divi Support user
 	 *
+	 * @since 3.22 Added filters to extend the list of capabilities for the ET Support User
 	 * @since 3.20
 	 */
 	public function support_user_create_roles() {
@@ -1381,126 +1388,86 @@ class ET_Support_Center {
 		$this->support_user_remove_roles();
 
 		// Divi Support :: Standard
-		add_role(
-			'et_support',
-			'ET Support',
-			array(
-				'assign_product_terms'      => true,
-				'delete_pages'              => true,
-				'delete_posts'              => true,
-				'delete_private_pages'      => true,
-				'delete_private_posts'      => true,
-				'delete_private_products'   => true,
-				'delete_product'            => true,
-				'delete_product_terms'      => true,
-				'delete_products'           => true,
-				'delete_published_pages'    => true,
-				'delete_published_posts'    => true,
-				'delete_published_products' => true,
-				'edit_dashboard'            => true,
-				'edit_files'                => true,
-				'edit_others_pages'         => true,
-				'edit_others_posts'         => true,
-				'edit_others_products'      => true,
-				'edit_pages'                => true,
-				'edit_posts'                => true,
-				'edit_private_pages'        => true,
-				'edit_private_posts'        => true,
-				'edit_private_products'     => true,
-				'edit_product'              => true,
-				'edit_product_terms'        => true,
-				'edit_products'             => true,
-				'edit_published_pages'      => true,
-				'edit_published_posts'      => true,
-				'edit_published_products'   => true,
-				'edit_theme_options'        => true,
-				'list_users'                => true,
-				'manage_categories'         => true,
-				'manage_links'              => true,
-				'manage_options'            => true,
-				'manage_product_terms'      => true,
-				'moderate_comments'         => true,
-				'publish_pages'             => true,
-				'publish_posts'             => true,
-				'publish_products'          => true,
-				'read'                      => true,
-				'read_private_pages'        => true,
-				'read_private_posts'        => true,
-				'read_private_products'     => true,
-				'read_product'              => true,
-				'upload_files'              => true,
-				// WooCommerce Capabilities
-				'manage_woocommerce'        => true,
-			)
+		$standard_capabilities = array(
+			'assign_product_terms'      => true,
+			'delete_pages'              => true,
+			'delete_posts'              => true,
+			'delete_private_pages'      => true,
+			'delete_private_posts'      => true,
+			'delete_private_products'   => true,
+			'delete_product'            => true,
+			'delete_product_terms'      => true,
+			'delete_products'           => true,
+			'delete_published_pages'    => true,
+			'delete_published_posts'    => true,
+			'delete_published_products' => true,
+			'edit_dashboard'            => true,
+			'edit_files'                => true,
+			'edit_others_pages'         => true,
+			'edit_others_posts'         => true,
+			'edit_others_products'      => true,
+			'edit_pages'                => true,
+			'edit_posts'                => true,
+			'edit_private_pages'        => true,
+			'edit_private_posts'        => true,
+			'edit_private_products'     => true,
+			'edit_product'              => true,
+			'edit_product_terms'        => true,
+			'edit_products'             => true,
+			'edit_published_pages'      => true,
+			'edit_published_posts'      => true,
+			'edit_published_products'   => true,
+			'edit_theme_options'        => true,
+			'list_users'                => true,
+			'manage_categories'         => true,
+			'manage_links'              => true,
+			'manage_options'            => true,
+			'manage_product_terms'      => true,
+			'moderate_comments'         => true,
+			'publish_pages'             => true,
+			'publish_posts'             => true,
+			'publish_products'          => true,
+			'read'                      => true,
+			'read_private_pages'        => true,
+			'read_private_posts'        => true,
+			'read_private_products'     => true,
+			'read_product'              => true,
+			'unfiltered_html'           => true,
+			'upload_files'              => true,
+			// WooCommerce Capabilities
+			'manage_woocommerce'        => true,
 		);
 
 		// Divi Support :: Elevated
-		add_role(
-			'et_support_elevated',
-			'ET Support - Elevated',
-			array(
-				'activate_plugins'          => true,
-				'assign_product_terms'      => true,
-				'delete_pages'              => true,
-				'delete_plugins'            => true,
-				'delete_posts'              => true,
-				'delete_private_pages'      => true,
-				'delete_private_posts'      => true,
-				'delete_private_products'   => true,
-				'delete_product'            => true,
-				'delete_product_terms'      => true,
-				'delete_products'           => true,
-				'delete_published_pages'    => true,
-				'delete_published_posts'    => true,
-				'delete_published_products' => true,
-				'delete_themes'             => true,
-				'edit_dashboard'            => true,
-				'edit_files'                => true,
-				'edit_others_pages'         => true,
-				'edit_others_posts'         => true,
-				'edit_others_products'      => true,
-				'edit_pages'                => true,
-				'edit_plugins'              => true,
-				'edit_posts'                => true,
-				'edit_private_pages'        => true,
-				'edit_private_posts'        => true,
-				'edit_private_products'     => true,
-				'edit_product'              => true,
-				'edit_product_terms'        => true,
-				'edit_products'             => true,
-				'edit_published_pages'      => true,
-				'edit_published_posts'      => true,
-				'edit_published_products'   => true,
-				'edit_theme_options'        => true,
-				'edit_themes'               => true,
-				'install_plugins'           => true,
-				'install_themes'            => true,
-				'list_users'                => true,
-				'manage_categories'         => true,
-				'manage_links'              => true,
-				'manage_options'            => true,
-				'manage_product_terms'      => true,
-				'moderate_comments'         => true,
-				'publish_pages'             => true,
-				'publish_posts'             => true,
-				'publish_products'          => true,
-				'read'                      => true,
-				'read_private_pages'        => true,
-				'read_private_posts'        => true,
-				'read_private_products'     => true,
-				'read_product'              => true,
-				'switch_themes'             => true,
-				'update_plugins'            => true,
-				'update_themes'             => true,
-				'upload_files'              => true,
-				// WooCommerce Capabilities
-				'manage_woocommerce'        => true,
-			)
-		);
+		$elevated_capabilities = array_merge( $standard_capabilities, array(
+			'activate_plugins' => true,
+			'delete_plugins'   => true,
+			'delete_themes'    => true,
+			'edit_plugins'     => true,
+			'edit_themes'      => true,
+			'install_plugins'  => true,
+			'install_themes'   => true,
+			'switch_themes'    => true,
+			'update_plugins'   => true,
+			'update_themes'    => true,
+		) );
+
+		// Filters to allow other code to extend the list of capabilities
+		$additional_standard = apply_filters( 'add_et_support_standard_capabilities', array() );
+		$additional_elevated = apply_filters( 'add_et_support_elevated_capabilities', array() );
+
+		// Apply filter capabilities to our definitions
+		$standard_capabilities = array_merge( $additional_standard, $standard_capabilities );
+		// Just like Elevated gets all of Standard's capabilities, it also inherits Standard's filter caps
+		$elevated_capabilities = array_merge( $additional_standard, $additional_elevated, $elevated_capabilities );
+
+		// Create the new roles
+		add_role( 'et_support', 'ET Support', $standard_capabilities );
+		add_role( 'et_support_elevated', 'ET Support - Elevated', $elevated_capabilities );
 	}
 
 	/**
-	 * Define both Standard and Elevated roles for the Divi Support user
+	 * Remove our Standard and Elevated Support roles
 	 *
 	 * @since 3.20
 	 */
@@ -1513,7 +1480,7 @@ class ET_Support_Center {
 	}
 
 	/**
-	 * Set the ET Support User role
+	 * Set the ET Support User's role
 	 *
 	 * @since 3.20
 	 *
@@ -1537,6 +1504,41 @@ class ET_Support_Center {
 		}
 	}
 
+	/**
+	 * Ensure the `unfiltered_html` capability is added to the ET Support roles in Multisite
+	 *
+	 * @since 3.22
+	 *
+	 * @param  array  $caps    An array of capabilities.
+	 * @param  string $cap     The capability being requested.
+	 * @param  int    $user_id The current user's ID.
+	 *
+	 * @return array Modified array of user capabilities.
+	 */
+	function support_user_map_meta_cap( $caps, $cap, $user_id ) {
+
+		if ( ! $this->is_support_user( $user_id ) ) {
+			return $caps;
+		}
+
+		// This user is in an ET Support user role, so add the capability
+		if ( 'unfiltered_html' === $cap ) {
+			$caps = array( 'unfiltered_html' );
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Remove KSES filters on ET Support User's content
+	 *
+	 * @since 3.22
+	 */
+	function support_user_kses_remove_filters() {
+		if ( $this->is_support_user() ) {
+			kses_remove_filters();
+		}
+	}
 
 	/**
 	 * Clear "Delete Account" cron hook
@@ -1753,6 +1755,43 @@ class ET_Support_Center {
 	}
 
 	/**
+	 * Is this user the ET Support User?
+	 *
+	 * @since 3.22
+	 *
+	 * @param int|null $user_id Pass a User ID to check. We'll get the current user's ID otherwise.
+	 *
+	 * @return bool Returns whether this user is the ET Support User.
+	 */
+	function is_support_user( $user_id = null ) {
+		$user_id = $user_id ? (int) $user_id : get_current_user_id();
+		if ( ! $user_id ) {
+			return false;
+		}
+
+		$user = get_userdata( $user_id );
+
+		// Gather this user's associated role(s)
+		$user_roles      = (array) $user->roles;
+		$user_is_support = false;
+
+		// First, check the username
+		if ( ! $this->support_user_account_name === $user->user_login ) {
+			return $user_is_support;
+		}
+
+		// Determine whether this user has the ET Support User role
+		if ( in_array( 'et_support', $user_roles ) ) {
+			$user_is_support = true;
+		}
+		if ( in_array( 'et_support_elevated', $user_roles ) ) {
+			$user_is_support = true;
+		}
+
+		return $user_is_support;
+	}
+
+	/**
 	 * Delete support account and the plugin options ( token, expiration date )
 	 *
 	 * @since 3.20
@@ -1935,28 +1974,30 @@ class ET_Support_Center {
 		}
 
 		?>
-		<div class="et-core-modal-overlay et-core-form et-core-safe-mode-block-modal">
-			<div class="et-core-modal">
-				<div class="et-core-modal-header">
-					<h3 class="et-core-modal-title">
-						<?php print esc_html__( 'Safe Mode', 'et-core' ); ?>
-					</h3>
-					<a href="#" class="et-core-modal-close" data-et-core-modal="close"></a>
-				</div>
-				<div id="et-core-safe-mode-block-modal-content">
-					<div class="et-core-modal-content">
-						<p><?php print esc_html__(
-								'Safe Mode is enabled and the current action cannot be performed.',
-								'et-core'
-							); ?></p>
+		<script type="text/template" id="et-ajax-saving-template">
+			<div class="et-core-modal-overlay et-core-form et-core-safe-mode-block-modal">
+				<div class="et-core-modal">
+					<div class="et-core-modal-header">
+						<h3 class="et-core-modal-title">
+							<?php print esc_html__( 'Safe Mode', 'et-core' ); ?>
+						</h3>
+						<a href="#" class="et-core-modal-close" data-et-core-modal="close"></a>
 					</div>
-					<a class="et-core-modal-action"
-					   href="<?php echo admin_url( null, 'admin.php?page=et_support_center#et_card_safe_mode' ); ?>">
-						<?php print esc_html__( sprintf( 'Turn Off %1$s Safe Mode', $this->parent_nicename ), 'et-core' ); ?>
-					</a>
+					<div id="et-core-safe-mode-block-modal-content">
+						<div class="et-core-modal-content">
+							<p><?php print esc_html__(
+									'Safe Mode is enabled and the current action cannot be performed.',
+									'et-core'
+								); ?></p>
+						</div>
+						<a class="et-core-modal-action"
+						   href="<?php echo admin_url( null, 'admin.php?page=et_support_center#et_card_safe_mode' ); ?>">
+							<?php print esc_html__( sprintf( 'Turn Off %1$s Safe Mode', $this->parent_nicename ), 'et-core' ); ?>
+						</a>
+					</div>
 				</div>
 			</div>
-		</div>
+		</script>
 		<?php
 
 	}
@@ -2332,7 +2373,7 @@ class ET_Support_Center {
 							'title'              => $card_title,
 							'content'            => $card_content,
 							'additional_classes' => array(
-								'et_remote_access',
+								'et_safe_mode',
 								'et-epanel-box',
 							),
 						) );

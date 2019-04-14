@@ -171,8 +171,10 @@ class ET_Core_Portability {
 	 * Initiate Export.
 	 *
 	 * @since 2.7.0
+	 *
+	 * @param bool $return
 	 */
-	public function export() {
+	public function export( $return = false ) {
 		$this->prevent_failure();
 		et_core_nonce_verified_previously();
 
@@ -233,6 +235,11 @@ class ET_Core_Portability {
 			'data'    => $data,
 			'images'  => $this->maybe_paginate_images( $images, 'encode_images', $timestamp ),
 		);
+
+		// Return exported content instead of printing it
+		if ( $return ) {
+			return $data;
+		}
 
 		$filesystem->put_contents( $temp_file, wp_json_encode( (array) $data ) );
 
