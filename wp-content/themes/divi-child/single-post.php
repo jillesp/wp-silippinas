@@ -59,45 +59,42 @@
                          <div class="et_post_meta_wrapper">
                              <h1 class="entry-title"><?php the_title(); ?></h1>
 
-                                <?php 
-                                    $thumb = '';
-    
-                                    $width = (int) apply_filters( 'et_pb_index_blog_image_width', 1080 );
-    
-                                    $height = (int) apply_filters( 'et_pb_index_blog_image_height', 675 );
-                                    $classtext = 'et_featured_image';
-                                    $titletext = get_the_title();
-                                    $thumbnail = get_thumbnail( $width, $height, $classtext, $titletext, $titletext, false, 'Blogimage' );
-                                    $thumb = $thumbnail["thumb"];
-    
-                                    $post_format = et_pb_post_format();
-    
-                                    if ( 'video' === $post_format && false !== ( $first_video = et_get_first_video() ) ) {
-                                        printf(
-                                            '<div class="et_main_video_container">
-                                                %1$s
-                                            </div>',
-                                            et_core_esc_previously( $first_video )
-                                        );
-                                    } else if ( ! in_array( $post_format, array( 'gallery', 'link', 'quote' ) ) && 'on' === et_get_option( 'divi_thumbnails', 'on' ) && '' !== $thumb ) {
-                                        print_thumbnail( $thumb, $thumbnail["use_timthumb"], $titletext, $width, $height );
-                                    } else if ( 'gallery' === $post_format ) {
-                                        et_pb_gallery_images();
-                                    }
-                                ?> 
-
-                                <br/>
- 
                             <?php if ( ! post_password_required() ) : ?>
                                 <?php if ( in_category('SilipBalita') ) { ?>
                                     <div class="post_meta_custom">
                                         <p> 
-                                            <br/>
                                             <!--<strong>By: </strong><?php the_author(); ?> <br/>-->
                                             <strong>Region: </strong><?php echo get_the_term_list( $post->ID, 'region', '', ', ', '' ); ?> <br/>
                                             <strong>Province: </strong><?php echo get_the_term_list( $post->ID, 'province', '', ', ', '' ); ?> <br/>
                                         </p>
                                     </div>
+
+                                    <?php 
+                                        $thumb = '';
+        
+                                        $width = (int) apply_filters( 'et_pb_index_blog_image_width', 1080 );
+        
+                                        $height = (int) apply_filters( 'et_pb_index_blog_image_height', 675 );
+                                        $classtext = 'et_featured_image';
+                                        $titletext = get_the_title();
+                                        $thumbnail = get_thumbnail( $width, $height, $classtext, $titletext, $titletext, false, 'Blogimage' );
+                                        $thumb = $thumbnail["thumb"];
+        
+                                        $post_format = et_pb_post_format();
+        
+                                        if ( 'video' === $post_format && false !== ( $first_video = et_get_first_video() ) ) {
+                                            printf(
+                                                '<div class="et_main_video_container">
+                                                    %1$s
+                                                </div>',
+                                                et_core_esc_previously( $first_video )
+                                            );
+                                        } else if ( ! in_array( $post_format, array( 'gallery', 'link', 'quote' ) ) && 'on' === et_get_option( 'divi_thumbnails', 'on' ) && '' !== $thumb ) {
+                                            print_thumbnail( $thumb, $thumbnail["use_timthumb"], $titletext, $width, $height );
+                                        } else if ( 'gallery' === $post_format ) {
+                                            et_pb_gallery_images();
+                                        }
+                                    ?> 
                                     <?php the_content(); ?>
                                     <div id="tabs">
                                         <ul>
@@ -143,6 +140,34 @@
                                 <!-- --- -->
 
                                 <?php if ( in_category('SilipKainan') || in_category('SilipTulugan') || in_category('SilipPasyalan') ) { ?>
+
+                                    <?php 
+                                        $thumb = '';
+        
+                                        $width = (int) apply_filters( 'et_pb_index_blog_image_width', 1080 );
+        
+                                        $height = (int) apply_filters( 'et_pb_index_blog_image_height', 675 );
+                                        $classtext = 'et_featured_image';
+                                        $titletext = get_the_title();
+                                        $thumbnail = get_thumbnail( $width, $height, $classtext, $titletext, $titletext, false, 'Blogimage' );
+                                        $thumb = $thumbnail["thumb"];
+        
+                                        $post_format = et_pb_post_format();
+        
+                                        if ( 'video' === $post_format && false !== ( $first_video = et_get_first_video() ) ) {
+                                            printf(
+                                                '<div class="et_main_video_container">
+                                                    %1$s
+                                                </div>',
+                                                et_core_esc_previously( $first_video )
+                                            );
+                                        } else if ( ! in_array( $post_format, array( 'gallery', 'link', 'quote' ) ) && 'on' === et_get_option( 'divi_thumbnails', 'on' ) && '' !== $thumb ) {
+                                            print_thumbnail( $thumb, $thumbnail["use_timthumb"], $titletext, $width, $height );
+                                        } else if ( 'gallery' === $post_format ) {
+                                            et_pb_gallery_images();
+                                        }
+                                    ?> 
+
                                     <?php the_content(); ?>
                                     <div class="slp-knn_content">
                                         <hr/>

@@ -8,7 +8,9 @@ console.log('theme.js loaded.')
         url = $(this).attr('href')
 
         if( !url || $('#snapper').hasClass('zoomed') ) return;
-        window.location.href = url;
+        // window.location.href = url;
+        var win = window.open(url, '_blank');
+        win.focus();
     });
 
     $('body').on('mouseover', function(e){
