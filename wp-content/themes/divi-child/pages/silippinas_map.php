@@ -165,6 +165,16 @@ $is_page_builder_used = et_pb_is_pagebuilder_used( get_the_ID() );
         var target = jQuery(this).parent();
         jQuery(target).carousel( jQuery(this).attr('data-slide') );
     })
+
+    jQuery('a').click(function(e){
+        e.preventDefault();
+        var target = e.target;
+        var url = jQuery(target).attr('href')
+
+        // console.log(url)
+        var win = window.open(url, '_blank');
+        win.focus();
+    })
   </script>
 
 <?php
