@@ -25,6 +25,8 @@
     #tabs > div {border: 1px solid #CCC;}
 
     #tabs > div > div {padding: 20px 0;}
+
+    .slp-knn_images > img {display: inline-block; max-width: calc(50% - 4px);}
     
 </style>
 
@@ -57,9 +59,8 @@
                          <div class="et_post_meta_wrapper">
                              <h1 class="entry-title"><?php the_title(); ?></h1>
  
-                         <?php if ( ! post_password_required() ) : ?>
+                            <?php if ( ! post_password_required() ) : ?>
                                 <?php if ( in_category('SilipBalita') ) { ?>
-                                
                                     <div class="post_meta_custom">
                                         <p>
                                             <!--<strong>By: </strong><?php the_author(); ?> <br/>-->
@@ -67,9 +68,7 @@
                                             <strong>Province: </strong><?php echo get_the_term_list( $post->ID, 'province', '', ', ', '' ); ?> <br/>
                                         </p>
                                     </div>
-                                
                                     <?php the_content(); ?>
-
                                     <div id="tabs">
                                         <ul>
                                             <li><a href="#tabs-1">
@@ -101,15 +100,18 @@
                                         </div>
                                         <?php }; ?>  
                                     </div>
-                                    
                                     <div>
                                         <p>
                                             <br />
                                             <strong>Source: </strong><?php echo (types_render_field('source', array() ));?>
                                         </p>
                                     </div>
-                                <?php }; ?>
+                                <?php }; ?>  
 
+                                
+                                
+                                <!-- --- -->
+                                
                                 <?php 
                                  $thumb = '';
  
@@ -136,6 +138,79 @@
                                      et_pb_gallery_images();
                                  }
                              ?>
+
+                                <?php if ( in_category('SilipKainan') || in_category('SilipTulugan') || in_category('SilipPasyalan') ) { ?>
+                                    <?php the_content(); ?>
+                                    <div class="slp-knn_content">
+                                        <hr/>
+                                        <div>
+                                            <br/>
+                                            <label><strong>About <?php the_title() ?></strong></label>
+                                            <br/>
+                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-description', true)) {?>
+                                                <p><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-description', true); ?></p>
+                                            <?php }; ?>  
+                                        </div>
+                                        <br/>
+                                        <div>
+                                            <label><strong>Address:</strong></label>
+                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-address', true)) {?>
+                                                <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-address', true); ?></span>
+                                            <?php }; ?>  
+                                        </div>
+                                        <div>
+                                            <label><strong>Email:</strong></label>
+                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-email', true)) {?>
+                                                <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-email', true); ?></span>
+                                            <?php }; ?>  
+                                        </div>
+                                        <div>
+                                            <label><strong>Amenities:</strong></label>
+                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-amenities', true)) {?>
+                                                <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-amenities', true); ?></span>
+                                            <?php }; ?>  
+                                        </div>
+                                        <div>
+                                            <label><strong>Extras:</strong></label>
+                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-extras', true)) {?>
+                                                <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-extras', true); ?></span>
+                                            <?php }; ?>  
+                                        </div>
+                                        
+                                        <div>
+                                            <label><strong>Landmarks:</strong></label>
+                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-nearest-landmark', true)) {?>
+                                                <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-nearest-landmark', true); ?></span>
+                                            <?php }; ?>  
+                                        </div>
+                                        <div>
+                                            <label><strong>Operating Hours:</strong></label>
+                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-operating-hours', true)) {?>
+                                                <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-operating-hours', true); ?></span>
+                                            <?php }; ?>  
+                                        </div>
+                                        <div>
+                                            <label><strong>Phone No.:</strong></label>
+                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-phone-no', true)) {?>
+                                                <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-phone-no', true); ?></span>
+                                            <?php }; ?>  
+                                        </div>
+                                        <div>
+                                            <label><strong>Promos:</strong></label>
+                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-promos', true)) {?>
+                                                <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-promos', true); ?></span>
+                                            <?php }; ?>  
+                                        </div>
+                                    </div>
+                                    <div class="slp-knn_images"> 
+                                        <?php if(get_post_meta(get_the_ID(), 'wpcf-image-1', true)) {?>
+                                            <img src="<?php echo get_post_meta(get_the_ID(), 'wpcf-image-1', true); ?>" />
+                                        <?php }; ?>  
+                                        <?php if(get_post_meta(get_the_ID(), 'wpcf-image-2', true)) {?>
+                                            <img src="<?php echo get_post_meta(get_the_ID(), 'wpcf-image-2', true); ?>" />
+                                        <?php }; ?>  
+                                    </div>
+                                <?php }; ?> 
  
                              <?php
                                  $text_color_class = et_divi_get_post_text_color();

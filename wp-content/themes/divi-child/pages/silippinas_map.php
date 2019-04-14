@@ -18,16 +18,16 @@ $is_page_builder_used = et_pb_is_pagebuilder_used( get_the_ID() );
 
   .layover .container:before {display: none !important; padding-top: 0 !important;}
 
-  .layover {max-width: 100%; width: 183px; padding: 20px; background-color: #FFF; border-radius: 5px; display: none; position: absolute; z-index: 999; opacity: 0; box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.25);}
+  .layover {max-width: 100%; width: auto; padding: 20px; background-color: #FFF; border-radius: 5px; display: none; position: absolute; z-index: 999; opacity: 0; box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.25);}
   .layover .thumb, .layover .content {display: inline-block; vertical-align: top;}
   .layover .thumb {width: 100%; padding: 10px;}
   .layover .content {width: calc(100% - 125px); width: 100%; color: #333; font-size: 10px;}
   .layover .content p {font-size: inherit; color: inherit; display: block; float: none; margin: 0 auto; padding: 0; line-height: normal;}
   .layover .content p strong {font-size: 14px;}
-  .layover .content img {display: none; margin: 0 auto; height: 60px; max-width: 100%; cursor: pointer;}
+  .layover .content img {display: none; margin: 0 auto; height: 60px; max-width: none !important; cursor: pointer;}
   .layover .content img.active {display: block;}
 
-  .snapper-wrapper {overflow: hidden;}
+  .snapper-wrapper {overflow: hidden; position: relative; top: -220px;}
   .snapper-zoom {position: fixed; top: 260px; left: calc(50% - 350px); transform: translateX(-50%); z-index: 999;}
   .snapper-zoom a {display: block; margin-bottom: 10px; border: 1px solid #000; border-radius: 5px; transition: .5s; line-height: 35px; height: 35px; width: 35px; text-align: center; background-color: #FFF; text-decoration: none !important; font-weight: bold; color: #000;}
   .snapper-zoom a:hover {color: #000; background-color: rgba(255, 255, 255, .5);}
