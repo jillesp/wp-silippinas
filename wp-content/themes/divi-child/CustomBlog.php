@@ -1035,6 +1035,7 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 		}
 
 		$args = array( 'posts_per_page' => (int) $posts_number );
+		$args['tax_query'] = array();
 
 		$et_paged = is_front_page() ? get_query_var( 'page' ) : get_query_var( 'paged' );
 
@@ -1046,7 +1047,7 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 			$args['cat'] = $include_categories;
 		}
 
-		if ( '' !== $include_regions && is_array($include_regions) ) {
+		if ( '' !== $include_regions ) {
 			$tax_query = array(
 				'taxonomy' => 'region',
 				'field' => 'term_id',
@@ -1055,7 +1056,7 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 			array_push($args['tax_query'], $tax_query);
 		}
 
-		if ( '' !== $include_provinces && is_array($include_provinces) ) {
+		if ( '' !== $include_provinces ) {
 			$tax_query = array(
 				'taxonomy' => 'province',
 				'field' => 'term_id',
@@ -1103,6 +1104,11 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 				echo '<div class="et_pb_salvattore_content" data-columns>';
 			}
 
+			// echo "<pre>";
+			// var_dump($args);
+			// echo "</pre>";
+
+
 			while ( have_posts() ) {
 				the_post();
 
@@ -1123,6 +1129,12 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 				$thumb = $thumbnail['thumb'];
 
 				$no_thumb_class = '' === $thumb || 'off' === $show_thumbnail ? ' et_pb_no_thumb' : '';
+
+				$term_id = (get_the_terms(get_the_ID(), "region"))[0]->term_id;
+
+				// echo "<pre>";
+				// var_dump($term_id);
+				// echo "</pre>";
 
 				if ( in_array( $post_format, array( 'video', 'gallery' ) ) ) {
 					$no_thumb_class = '';
