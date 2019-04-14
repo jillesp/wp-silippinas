@@ -106,11 +106,34 @@ $is_page_builder_used = et_pb_is_pagebuilder_used( get_the_ID() );
                 </div>
               </div>
               
-              <div style='background-color:#d5163e; padding-top: 15px; padding-bottom: 15px;'>
-            <p style='font-size: 26px; color: white; font-family: Arial; max-width: 80%; margin: 0 auto; text-align: center; padding: 20px'>
-                HUWAG MAGING BANYAGA SA SARILING BAYAN... SILIP NA SA PINAS, KABAYAN!
-            </p>
-        </div>
+              <!-- <div style='background-color:#d5163e; padding-top: 15px; padding-bottom: 15px;'>
+                  <p style='font-size: 26px; color: white; font-family: Arial; max-width: 80%; margin: 0 auto; text-align: center; padding: 20px'>
+                      HUWAG MAGING BANYAGA SA SARILING BAYAN... SILIP NA SA PINAS, KABAYAN!
+                  </p>
+              </div> -->
+
+              <div class='carousel-group'>
+                <div id="carousel-<?php echo get_the_ID(); ?>" class="carousel slide" data-ride="carousel" data-interval="5000">
+                  <div class="carousel-inner">
+                    <div class="carousel-item active" style='background-color:#d5163e; padding-top: 15px; padding-bottom: 15px;'>
+                      <p style='font-size: 26px; color: white; font-family: Arial; max-width: 80%; margin: 0 auto; text-align: center; padding: 20px'>HUWAG MAGING BANYAGA SA SARILING BAYAN...</p>
+                    </div>
+                    <div class="carousel-item" style='background-color:#d5163e; padding-top: 15px; padding-bottom: 15px;'>
+                      <p style='font-size: 26px; color: white; font-family: Arial; max-width: 80%; margin: 0 auto; text-align: center; padding: 20px'>SILIP NA SA PINAS, KABAYAN!</p>
+                    </div>
+                  </div>
+                  <!-- <a class="carousel-control-prev" href="#" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                  </a>
+                  <a class="carousel-control-next" href="#" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                  </a> -->
+                </div>
+              </div>
+              
+            </div>
 
         <?php
           if ( ! $is_page_builder_used && comments_open() && 'on' === et_get_option( 'divi_show_pagescomments', 'false' ) ) comments_template( '', true );
@@ -135,6 +158,14 @@ $is_page_builder_used = et_pb_is_pagebuilder_used( get_the_ID() );
   <script src="https://silippinas.com/wp-content/uploads/assets/vendor/snap.svg/src/matrix.js"></script>
   <script src="https://silippinas.com/wp-content/uploads/assets/js/settings.js"></script>
   <script src="https://silippinas.com/wp-content/uploads/assets/js/map.js"></script>
+
+  <script>
+    jQuery('.carousel > a').click(function(e){
+        e.preventDefault();
+        var target = jQuery(this).parent();
+        jQuery(target).carousel( jQuery(this).attr('data-slide') );
+    })
+  </script>
 
 <?php
 
