@@ -1558,6 +1558,170 @@ function et_builder_include_categories_option( $args = array() ) {
 endif;
 
 /**
+ * Generate output string for `include_capitals` option used in backbone template.
+ * @param array
+ * @return string
+ */
+
+if ( ! function_exists( 'et_builder_include_capitals_option' ) ) :
+	function et_builder_include_capitals_option( $args = array() ) {
+		$defaults = apply_filters( 'et_builder_include_capitals_defaults', array (
+			'use_terms' => true,
+			'term_name' => 'capital',
+		) );
+	
+		$args = wp_parse_args( $args, $defaults );
+	
+		// $term_args = apply_filters( 'et_builder_include_capitals_option_args', array( 'hide_empty' => false, ) );
+	
+		$output = "\t" . "<% var et_pb_include_capitals_temp = typeof data !== 'undefined' && typeof data.et_pb_include_capitals !== 'undefined' ? data.et_pb_include_capitals.split( ',' ) : []; et_pb_include_capitals_temp = typeof data === 'undefined' && typeof et_pb_include_capitals !== 'undefined' ? et_pb_include_capitals.split( ',' ) : et_pb_include_capitals_temp; %>" . "\n";
+	
+		// if ( $args['use_terms'] ) {
+			$cats_array = get_terms( $args['term_name'] );
+		// } else {
+		// 	$cats_array = get_capitals( apply_filters( 'et_builder_get_capitals_args', 'hide_empty=0' ) );
+		// }
+	
+		// if ( empty( $cats_array ) ) {
+			// $taxonomy_type = $args['use_terms'] ? $args['term_name'] : 'category';
+			// $taxonomy_type = 'capital';
+			// $taxonomy = get_taxonomy( $taxonomy_type );
+			// $labels = get_taxonomy_labels( $taxonomy );
+			// $output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
+		// }
+	
+		foreach ( $cats_array as $category ) {
+			$contains = sprintf(
+				'<%%= _.contains( et_pb_include_capitals_temp, "%1$s" ) ? checked="checked" : "" %%>',
+				esc_html( $category->term_id )
+			);
+	
+			$output .= sprintf(
+				'%4$s<label><input type="checkbox" name="et_pb_include_capitals" value="%1$s"%3$s> %2$s</label><br/>',
+				esc_attr( $category->term_id ),
+				esc_html( $category->name ),
+				$contains,
+				"\n\t\t\t\t\t"
+			);
+		}
+	
+		$output = '<div id="et_pb_include_capitals">' . $output . '</div>';
+	
+		return apply_filters( 'et_builder_include_capitals_option_html', $output );
+	}
+	endif;
+
+/**
+ * Generate output string for `include_municipals` option used in backbone template.
+ * @param array
+ * @return string
+ */
+
+if ( ! function_exists( 'et_builder_include_municipals_option' ) ) :
+	function et_builder_include_municipals_option( $args = array() ) {
+		$defaults = apply_filters( 'et_builder_include_municipals_defaults', array (
+			'use_terms' => true,
+			'term_name' => 'municipal',
+		) );
+	
+		$args = wp_parse_args( $args, $defaults );
+	
+		// $term_args = apply_filters( 'et_builder_include_municipals_option_args', array( 'hide_empty' => false, ) );
+	
+		$output = "\t" . "<% var et_pb_include_municipals_temp = typeof data !== 'undefined' && typeof data.et_pb_include_municipals !== 'undefined' ? data.et_pb_include_municipals.split( ',' ) : []; et_pb_include_municipals_temp = typeof data === 'undefined' && typeof et_pb_include_municipals !== 'undefined' ? et_pb_include_municipals.split( ',' ) : et_pb_include_municipals_temp; %>" . "\n";
+	
+		// if ( $args['use_terms'] ) {
+			$cats_array = get_terms( $args['term_name'] );
+		// } else {
+		// 	$cats_array = get_municipals( apply_filters( 'et_builder_get_municipals_args', 'hide_empty=0' ) );
+		// }
+	
+		// if ( empty( $cats_array ) ) {
+			// $taxonomy_type = $args['use_terms'] ? $args['term_name'] : 'category';
+			// $taxonomy_type = 'municipal';
+			// $taxonomy = get_taxonomy( $taxonomy_type );
+			// $labels = get_taxonomy_labels( $taxonomy );
+			// $output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
+		// }
+	
+		foreach ( $cats_array as $category ) {
+			$contains = sprintf(
+				'<%%= _.contains( et_pb_include_municipals_temp, "%1$s" ) ? checked="checked" : "" %%>',
+				esc_html( $category->term_id )
+			);
+	
+			$output .= sprintf(
+				'%4$s<label><input type="checkbox" name="et_pb_include_municipals" value="%1$s"%3$s> %2$s</label><br/>',
+				esc_attr( $category->term_id ),
+				esc_html( $category->name ),
+				$contains,
+				"\n\t\t\t\t\t"
+			);
+		}
+	
+		$output = '<div id="et_pb_include_municipals">' . $output . '</div>';
+	
+		return apply_filters( 'et_builder_include_municipals_option_html', $output );
+	}
+	endif;
+
+	/**
+ * Generate output string for `include_barangays` option used in backbone template.
+ * @param array
+ * @return string
+ */
+
+if ( ! function_exists( 'et_builder_include_barangays_option' ) ) :
+	function et_builder_include_barangays_option( $args = array() ) {
+		$defaults = apply_filters( 'et_builder_include_barangays_defaults', array (
+			'use_terms' => true,
+			'term_name' => 'barangay',
+		) );
+	
+		$args = wp_parse_args( $args, $defaults );
+	
+		// $term_args = apply_filters( 'et_builder_include_barangays_option_args', array( 'hide_empty' => false, ) );
+	
+		$output = "\t" . "<% var et_pb_include_barangays_temp = typeof data !== 'undefined' && typeof data.et_pb_include_barangays !== 'undefined' ? data.et_pb_include_barangays.split( ',' ) : []; et_pb_include_barangays_temp = typeof data === 'undefined' && typeof et_pb_include_barangays !== 'undefined' ? et_pb_include_barangays.split( ',' ) : et_pb_include_barangays_temp; %>" . "\n";
+	
+		// if ( $args['use_terms'] ) {
+			$cats_array = get_terms( $args['term_name'] );
+		// } else {
+		// 	$cats_array = get_barangays( apply_filters( 'et_builder_get_barangays_args', 'hide_empty=0' ) );
+		// }
+	
+		// if ( empty( $cats_array ) ) {
+			// $taxonomy_type = $args['use_terms'] ? $args['term_name'] : 'category';
+			// $taxonomy_type = 'barangay';
+			// $taxonomy = get_taxonomy( $taxonomy_type );
+			// $labels = get_taxonomy_labels( $taxonomy );
+			// $output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
+		// }
+	
+		foreach ( $cats_array as $category ) {
+			$contains = sprintf(
+				'<%%= _.contains( et_pb_include_barangays_temp, "%1$s" ) ? selected="selected" : "" %%>',
+				esc_html( $category->term_id )
+			);
+	
+			$output .= sprintf(
+				'%4$s<label><option name="et_pb_include_barangays" value="%1$s"%3$s%5$s> %2$s</option></label><br/>',
+				esc_attr( $category->term_id ),
+				esc_html( $category->name ),
+				$contains,
+				"\n\t\t\t\t\t",
+				selected( $value, $selected )
+			);
+		
+		}
+	
+		$output = '<div id="et_pb_include_barangays"><select>' . $output . '</select></div>';
+	
+		return apply_filters( 'et_builder_include_barangays_option_html', $output );
+	}
+	endif;
+
+/**
  * Generate output string for `include_regions` option used in backbone template.
  * @param array
  * @return string

@@ -798,9 +798,18 @@ class ET_Builder_Element {
 				switch ( $info['renderer'] ) {
 					case 'et_builder_include_regions_option' :
 						$updated_field_type = 'regions';
+                        break;
+					case 'et_builder_include_capitals_option' :
+						$updated_field_type = 'capitals';
 						break;
 					case 'et_builder_include_provinces_option' :
 						$updated_field_type = 'provinces';
+						break;
+					case 'et_builder_include_municipals_option' :
+						$updated_field_type = 'municipals';
+						break;
+					case 'et_builder_include_barangay_option' :
+						$updated_field_type = 'barangays';
 						break;
 					case 'et_builder_include_categories_option' :
 					case 'et_builder_include_categories_shop_option' :
@@ -5790,6 +5799,15 @@ class ET_Builder_Element {
 					break;
 				case 'provinces' :
 					$renderer_method = 'et_builder_include_provinces_option';
+                    break;
+                case 'capitals' :
+					$renderer_method = 'et_builder_include_capitals_option';
+					break;
+				case 'municipals' :
+					$renderer_method = 'et_builder_include_municipals_option';
+					break;
+				case 'barangays' :
+					$renderer_method = 'et_builder_include_barangays_option';
 					break;
 				case 'select_sidebar' :
 					$renderer_method = 'et_builder_get_widget_areas';
