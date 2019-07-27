@@ -1754,7 +1754,6 @@ if ( ! function_exists( 'et_builder_include_regions_option' ) ) :
 		}
 	
 		$output = "<div id='{$args['field_name']}'>" . $output . '</div>';
-	
 		return apply_filters( 'et_builder_include_regions_option_html', $output );
 	}
 	endif;
@@ -1847,35 +1846,28 @@ if ( ! function_exists( 'et_builder_include_capitals_option' ) ) :
 		$output = "\t" . "<% var {$args['field_name']}_temp = typeof data !== 'undefined' && typeof data.{$args['field_name']} !== 'undefined' ? data.{$args['field_name']}.split( ',' ) : ['" . esc_html( $default_capital ) . "']; {$args['field_name']}_temp = typeof data === 'undefined' && typeof {$args['field_name']} !== 'undefined' ? {$args['field_name']}.split( ',' ) : {$args['field_name']}_temp; %>" . "\n";
 	
 		$cats_array = get_terms( $args['term_name'], $term_args );
-		
 		$cats_array = array_merge( $custom_items, $cats_array );
 	
-		if ( empty( $cats_array ) ) {
-			$taxonomy_type = $args['use_terms'] ? $args['term_name'] : 'capital';
-			$taxonomy = get_taxonomy( $taxonomy_type );
-			$labels = get_taxonomy_labels( $taxonomy );
-			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
-		}
-	
-		foreach ( $cats_array as $capital ) {
-			$contains = sprintf(
-				"<%%= _.contains( {$args['field_name']}_temp, '%1\$s' ) ? checked='checked' : '' %%>",
-				is_array( $capital ) ? esc_html( $capital['term_id'] ) : esc_html( $capital->term_id )
+		$output .= '<select name="{$args["field_name"]}" id="{$args["field_name"]}"><option> Unset </option>';
+
+		foreach ( $cats_array as $cat ) {
+			$selected = sprintf(
+				'<%%= typeof( $args["field_name"] ) !== "undefined" && "%1$s" == $args["field_name"] ?  " selected=\'selected\'" : "" %%>',
+				esc_html( $cat->term_id )
 			);
 	
 			$output .= sprintf(
-				'%4$s<label><input type="checkbox" name="%5$s" value="%1$s"%3$s> %2$s</label><br/>',
-				is_array( $capital ) ? esc_html( $capital['term_id'] ) : esc_html( $capital->term_id ),
-				is_array( $capital ) ? esc_html( $capital['name'] ) : esc_html( $capital->name ),
-				$contains,
-				"\n\t\t\t\t\t",
-				$args['field_name']
+				'<option value="%1$s"%3$s> %2$s</option>',
+				esc_html( $cat->term_id ),
+				esc_html( $cat->name ),
+				$selected
 			);
 		}
 	
-		$output = "<div id='{$args['field_name']}'>" . $output . '</div>';
-	
+		$output .= '</select>';
+
 		return apply_filters( 'et_builder_include_capitals_option_html', $output );
+
 	}
 	endif;
 
@@ -1917,25 +1909,25 @@ if ( ! function_exists( 'et_builder_include_municipals_option' ) ) :
 			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
 		}
 	
-		foreach ( $cats_array as $municipal ) {
-			$contains = sprintf(
-				"<%%= _.contains( {$args['field_name']}_temp, '%1\$s' ) ? checked='checked' : '' %%>",
-				is_array( $municipal ) ? esc_html( $municipal['term_id'] ) : esc_html( $municipal->term_id )
-			);
+		// $output .= '<select name="{$args["field_name"]}" id="{$args["field_name"]}">';
+
+		// foreach ( $cats_array as $cat ) {
+		// 	$selected = sprintf(
+		// 		'<%%= typeof( $args["field_name"] ) !== "undefined" && "%1$s" == $args["field_name"] ?  " selected=\'selected\'" : "" %%>',
+		// 		esc_html( $cat->term_id )
+		// 	);
 	
-			$output .= sprintf(
-				'%4$s<label><input type="checkbox" name="%5$s" value="%1$s"%3$s> %2$s</label><br/>',
-				is_array( $municipal ) ? esc_html( $municipal['term_id'] ) : esc_html( $municipal->term_id ),
-				is_array( $municipal ) ? esc_html( $municipal['name'] ) : esc_html( $municipal->name ),
-				$contains,
-				"\n\t\t\t\t\t",
-				$args['field_name']
-			);
-		}
+		// 	$output .= sprintf(
+		// 		'<option value="%1$s"%3$s> %2$s</option>',
+		// 		esc_html( $cat->term_id ),
+		// 		esc_html( $cat->name ),
+		// 		$selected
+		// 	);
+		// }
 	
-		$output = "<div id='{$args['field_name']}'>" . $output . '</div>';
+		// $output .= '</select>';
 	
-		return apply_filters( 'et_builder_include_municipals_option_html', $output );
+		// return apply_filters( 'et_builder_include_municipals_option_html', $output );
 	}
 	endif;
 
@@ -1977,25 +1969,25 @@ if ( ! function_exists( 'et_builder_include_barangays_option' ) ) :
 			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
 		}
 	
-		foreach ( $cats_array as $barangay ) {
-			$contains = sprintf(
-				"<%%= _.contains( {$args['field_name']}_temp, '%1\$s' ) ? checked='checked' : '' %%>",
-				is_array( $barangay ) ? esc_html( $barangay['term_id'] ) : esc_html( $barangay->term_id )
-			);
+		// $output .= '<select name="{$args["field_name"]}" id="{$args["field_name"]}">';
+
+		// foreach ( $cats_array as $cat ) {
+		// 	$selected = sprintf(
+		// 		'<%%= typeof( $args["field_name"] ) !== "undefined" && "%1$s" == $args["field_name"] ?  " selected=\'selected\'" : "" %%>',
+		// 		esc_html( $cat->term_id )
+		// 	);
 	
-			$output .= sprintf(
-				'%4$s<label><input type="checkbox" name="%5$s" value="%1$s"%3$s> %2$s</label><br/>',
-				is_array( $barangay ) ? esc_html( $barangay['term_id'] ) : esc_html( $barangay->term_id ),
-				is_array( $barangay ) ? esc_html( $barangay['name'] ) : esc_html( $barangay->name ),
-				$contains,
-				"\n\t\t\t\t\t",
-				$args['field_name']
-			);
-		}
+		// 	$output .= sprintf(
+		// 		'<option value="%1$s"%3$s> %2$s</option>',
+		// 		esc_html( $cat->term_id ),
+		// 		esc_html( $cat->name ),
+		// 		$selected
+		// 	);
+		// }
 	
-		$output = "<div id='{$args['field_name']}'>" . $output . '</div>';
+		// $output .= '</select>';
 	
-		return apply_filters( 'et_builder_include_barangays_option_html', $output );
+		// return apply_filters( 'et_builder_include_barangays_option_html', $output );
 	}
 	endif;
 

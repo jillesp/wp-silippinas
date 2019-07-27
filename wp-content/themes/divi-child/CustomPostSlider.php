@@ -496,7 +496,7 @@ class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBa
 				'type'             => 'regions',
 				'option_category'  => 'basic_option',
 				'renderer_options' => array(
-					'use_terms' => false,
+					'use_terms' => true,
 				),
 				'description'      => esc_html__( 'Choose which regions you would like to include in the slider.', 'et_builder' ),
 				'toggle_slug'      => 'main_content',
@@ -509,7 +509,7 @@ class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBa
 				'type'             => 'provinces',
 				'option_category'  => 'basic_option',
 				'renderer_options' => array(
-					'use_terms' => false,
+					'use_terms' => true,
 				),
 				'description'      => esc_html__( 'Choose which provinces you would like to include in the slider.', 'et_builder' ),
 				'toggle_slug'      => 'main_content',
@@ -522,7 +522,7 @@ class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBa
 				'type'             => 'capitals',
 				'option_category'  => 'basic_option',
 				'renderer_options' => array(
-					'use_terms' => false,
+					'use_terms' => true,
 				),
 				'description'      => esc_html__( 'Choose which capitals you would like to include in the slider.', 'et_builder' ),
 				'toggle_slug'      => 'main_content',
@@ -535,9 +535,8 @@ class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBa
 				'type'             => 'municipals',
 				'option_category'  => 'basic_option',
 				'renderer_options' => array(
-					'use_terms' => false,
+					'use_terms' => true,
 				),
-				'description'      => esc_html__( 'Choose which BLAH you would like to include in the slider.', 'et_builder' ),
 				'description'      => esc_html__( 'Choose which municipality you would like to include in the slider.', 'et_builder' ),
 				'toggle_slug'      => 'main_content',
 				'computed_affects' => array(
@@ -549,7 +548,7 @@ class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBa
 				'type'             => 'barangays',
 				'option_category'  => 'basic_option',
 				'renderer_options' => array(
-					'use_terms' => false,
+					'use_terms' => true,
 				),
 				'description'      => esc_html__( 'Choose which barangays you would like to include in the slider.', 'et_builder' ),
 				'toggle_slug'      => 'main_content',
@@ -833,7 +832,7 @@ class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBa
 			),
 			'__posts' => array(
 				'type'                => 'computed',
-				'computed_callback'   => array( 'ET_Builder_Module_Fullwidth_Post_Slider', 'get_blog_posts' ),
+				'computed_callback'   => array( 'ET_Builder_Module_Post_Slider_Custom', 'get_blog_posts' ),
 				'computed_depends_on' => array(
 					'posts_number',
 					'include_categories',

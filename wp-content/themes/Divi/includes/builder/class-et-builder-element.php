@@ -946,7 +946,7 @@ class ET_Builder_Element {
 					case 'et_builder_generate_center_map_setting' :
 						$updated_field_type = 'center_map';
 						break;
-						case 'et_builder_include_regions_option' :
+					case 'et_builder_include_regions_option' :
 						$updated_field_type = 'regions';
                         break;
 					case 'et_builder_include_capitals_option' :
