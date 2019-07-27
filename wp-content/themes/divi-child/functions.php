@@ -192,3 +192,53 @@ function prep_custom_modules(){
 }
 
 prep_custom_modules();
+
+
+function restrict_user_categories( $classes ) {
+
+	$spec_user = get_current_user_id();
+	
+	switch ($spec_user) {
+		case 105: //barangay
+			?><style type='text/css'>
+				#categorychecklist #category-223,
+				#categorychecklist #category-224 { display: block; }
+				#categorychecklist #category-225,
+				#categorychecklist #category-226,
+				#categorychecklist #category-222,
+				#categorychecklist #category-221 { display: none; }
+    		</style><?php
+		break;
+		case 103: //kapitolyo
+			?><style type='text/css'>
+				#categorychecklist #category-226,
+				#categorychecklist #category-225 { display: block; }
+				#categorychecklist #category-223,
+				#categorychecklist #category-224,
+				#categorychecklist #category-222,
+				#categorychecklist #category-221 { display: none; }
+    		</style><?php
+		break;
+		case 104: //munisipyo
+			?><style type='text/css'>
+				#categorychecklist #category-222,
+				#categorychecklist #category-221 { display: block; }
+				#categorychecklist #category-225,
+				#categorychecklist #category-226,
+				#categorychecklist #category-223,
+				#categorychecklist #category-224 { display: none; }
+    		</style><?php
+		default:
+			?><style type='text/css'>
+				#categorychecklist #category-222,
+				#categorychecklist #category-221,
+				#categorychecklist #category-225,
+				#categorychecklist #category-226,
+				#categorychecklist #category-223,
+				#categorychecklist #category-224 { display: none; }
+    		</style><?php
+		break;
+	}
+    
+}
+add_action('admin_head', 'restrict_user_categories');
