@@ -551,6 +551,359 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 		return $fields;
 	}
 
+	/**
+	 * Get blog posts for blog module
+	 *
+	 * @param array   arguments that is being used by et_pb_blog
+	 * @return string blog post markup
+	 */
+	static function get_blog_posts( $args = array(), $conditional_tags = array(), $current_page = array() ) {
+		global $paged, $post, $wp_query, $et_fb_processing_shortcode_object, $et_pb_rendering_column_content;
+
+		$global_processing_original_value = $et_fb_processing_shortcode_object;
+
+		// Default params are combination of attributes that is used by et_pb_blog and
+		// conditional tags that need to be simulated (due to AJAX nature) by passing args
+		$defaults = array(
+			'fullwidth'                     => '',
+			'posts_number'                  => '',
+			'include_categories'            => '',
+			'include_regions'            	=> '',
+			'include_provinces'            	=> '',
+			'meta_date'                     => '',
+			'show_thumbnail'                => '',
+			'show_content'                  => '',
+			'show_author'                   => '',
+			'show_date'                     => '',
+			'show_categories'               => '',
+			'show_comments'                 => '',
+			'show_pagination'               => '',
+			'background_layout'             => '',
+			'show_more'                     => '',
+			'offset_number'                 => '',
+			'masonry_tile_background_color' => '',
+			'overlay_icon_color'            => '',
+			'hover_overlay_color'           => '',
+			'hover_icon'                    => '',
+			'use_overlay'                   => '',
+			'header_level'                  => 'h2',
+		);
+
+		// WordPress' native conditional tag is only available during page load. It'll fail during component update because
+		// et_pb_process_computed_property() is loaded in admin-ajax.php. Thus, use WordPress' conditional tags on page load and
+		// rely to passed $conditional_tags for AJAX call
+		$is_front_page               = et_fb_conditional_tag( 'is_front_page', $conditional_tags );
+		$is_search                   = et_fb_conditional_tag( 'is_search', $conditional_tags );
+		$is_single                   = et_fb_conditional_tag( 'is_single', $conditional_tags );
+		$et_is_builder_plugin_active = et_fb_conditional_tag( 'et_is_builder_plugin_active', $conditional_tags );
+		$post_id                     = isset( $current_page['id'] ) ? (int) $current_page['id'] : 0;
+
+		$container_is_closed = false;
+
+		// remove all filters from WP audio shortcode to make sure current theme doesn't add any elements into audio module
+		remove_all_filters( 'wp_audio_shortcode_library' );
+		remove_all_filters( 'wp_audio_shortcode' );
+		remove_all_filters( 'wp_audio_shortcode_class' );
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$processed_header_level = et_pb_process_header_level( $args['header_level'], 'h2' );
+		$processed_header_level = esc_html( $processed_header_level );
+
+		$overlay_output = '';
+		$hover_icon = '';
+
+		if ( 'on' === $args['use_overlay'] ) {
+			$data_icon = '' !== $args['hover_icon']
+				? sprintf(
+					' data-icon="%1$s"',
+					esc_attr( et_pb_process_font_icon( $args['hover_icon'] ) )
+				)
+				: '';
+
+			$overlay_output = sprintf(
+				'<span class="et_overlay%1$s"%2$s></span>',
+				( '' !== $args['hover_icon'] ? ' et_pb_inline_icon' : '' ),
+				$data_icon
+			);
+		}
+
+		$overlay_class = 'on' === $args['use_overlay'] ? ' et_pb_has_overlay' : '';
+
+		$query_args = array(
+			'posts_per_page' => intval( $args['posts_number'] ),
+			'post_status'    => 'publish',
+		);
+
+		if ( defined( 'DOING_AJAX' ) && isset( $current_page['paged'] ) ) {
+			$paged = intval( $current_page['paged'] ); //phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited
+		} else {
+			$paged = $is_front_page ? get_query_var( 'page' ) : get_query_var( 'paged' ); //phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited
+		}
+
+		// support pagination in VB
+		if ( isset( $args['__page'] ) ) {
+			$paged = $args['__page']; //phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited
+		}
+
+		if ( '' !== $args['include_categories'] ) {
+			$query_args['cat'] = implode( ',', self::filter_meta_categories( $args['include_categories'], $post_id ) );
+		}
+
+		if ( ! $is_search ) {
+			$query_args['paged'] = $paged;
+		}
+
+		if ( '' !== $args['offset_number'] && ! empty( $args['offset_number'] ) ) {
+			/**
+			 * Offset + pagination don't play well. Manual offset calculation required
+			 * @see: https://codex.wordpress.org/Making_Custom_Queries_using_Offset_and_Pagination
+			 */
+			if ( $paged > 1 ) {
+				$query_args['offset'] = ( ( $paged - 1 ) * intval( $args['posts_number'] ) ) + intval( $args['offset_number'] );
+			} else {
+				$query_args['offset'] = intval( $args['offset_number'] );
+			}
+		}
+
+		if ( $is_single ) {
+			$query_args['post__not_in'][] = get_the_ID();
+		}
+
+		// Get query
+		$query = new WP_Query( $query_args );
+
+		// Keep page's $wp_query global
+		$wp_query_page = $wp_query;
+
+		// Turn page's $wp_query into this module's query
+		$wp_query = $query; //phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited
+
+		ob_start();
+
+		if ( $query->have_posts() ) {
+			if ( 'on' !== $args['fullwidth'] ) {
+				echo '<div class="et_pb_salvattore_content" data-columns>';
+			}
+
+			while( $query->have_posts() ) {
+				$query->the_post();
+				global $et_fb_processing_shortcode_object;
+
+				$global_processing_original_value = $et_fb_processing_shortcode_object;
+
+				// reset the fb processing flag
+				$et_fb_processing_shortcode_object = false;
+
+				$thumb          = '';
+				$width          = 'on' === $args['fullwidth'] ? 1080 : 400;
+				$width          = (int) apply_filters( 'et_pb_blog_image_width', $width );
+				$height         = 'on' === $args['fullwidth'] ? 675 : 250;
+				$height         = (int) apply_filters( 'et_pb_blog_image_height', $height );
+				$classtext      = 'on' === $args['fullwidth'] ? 'et_pb_post_main_image' : '';
+				$titletext      = get_the_title();
+				$thumbnail      = get_thumbnail( $width, $height, $classtext, $titletext, $titletext, false, 'Blogimage' );
+				$thumb          = $thumbnail["thumb"];
+				$no_thumb_class = '' === $thumb || 'off' === $args['show_thumbnail'] ? ' et_pb_no_thumb' : '';
+
+				$post_format = et_pb_post_format();
+				if ( in_array( $post_format, array( 'video', 'gallery' ) ) ) {
+					$no_thumb_class = '';
+				}
+
+				// Print output
+				?>
+					<article id="" <?php post_class( 'et_pb_post clearfix' . $no_thumb_class . $overlay_class ) ?>>
+						<?php
+							et_divi_post_format_content();
+
+							if ( ! in_array( $post_format, array( 'link', 'audio', 'quote' ) ) ) {
+								if ( 'video' === $post_format && false !== ( $first_video = et_get_first_video() ) ) :
+									$video_overlay = has_post_thumbnail() ? sprintf(
+										'<div class="et_pb_video_overlay" style="background-image: url(%1$s); background-size: cover;">
+											<div class="et_pb_video_overlay_hover">
+												<a href="#" class="et_pb_video_play"></a>
+											</div>
+										</div>',
+										et_core_esc_previously( $thumb )
+									) : '';
+
+									printf(
+										'<div class="et_main_video_container">
+											%1$s
+											%2$s
+										</div>',
+										et_core_esc_previously( $video_overlay ),
+										et_core_esc_previously( $first_video )
+									);
+								elseif ( 'gallery' === $post_format ) :
+									et_pb_gallery_images( 'slider' );
+								elseif ( '' !== $thumb && 'on' === $args['show_thumbnail'] ) :
+									if ( 'on' !== $args['fullwidth'] ) echo '<div class="et_pb_image_container">'; ?>
+										<a href="<?php esc_url( the_permalink() ); ?>" class="entry-featured-image-url">
+											<?php print_thumbnail( $thumb, $thumbnail["use_timthumb"], $titletext, $width, $height ); ?>
+											<?php if ( 'on' === $args['use_overlay'] ) {
+												echo et_core_esc_previously( $overlay_output );
+											} ?>
+										</a>
+								<?php
+									if ( 'on' !== $args['fullwidth'] ) echo '</div> <!-- .et_pb_image_container -->';
+								endif;
+							}
+						?>
+
+						<?php if ( 'off' === $args['fullwidth'] || ! in_array( $post_format, array( 'link', 'audio', 'quote' ) ) ) { ?>
+							<?php if ( ! in_array( $post_format, array( 'link', 'audio' ) ) ) { ?>
+								<<?php echo et_core_esc_previously( $processed_header_level ); ?> class="entry-title"><a href="<?php esc_url( the_permalink() ); ?>"><?php the_title(); ?></a></<?php echo et_core_esc_previously( $processed_header_level ); ?>>
+							<?php } ?>
+
+							<?php
+								if ( 'on' === $args['show_author'] || 'on' === $args['show_date'] || 'on' === $args['show_categories'] || 'on' === $args['show_comments'] ) {
+									$author = 'on' === $args['show_author']
+										? et_get_safe_localization( sprintf( __( 'by %s', 'et_builder' ), '<span class="author vcard">' .  et_pb_get_the_author_posts_link() . '</span>' ) )
+										: '';
+
+									$author_separator = 'on' === $args['show_author'] && 'on' === $args['show_date']
+										? ' | '
+										: '';
+
+									$date = 'on' === $args['show_date']
+										? et_get_safe_localization( sprintf( __( '%s', 'et_builder' ), '<span class="published">' . esc_html( get_the_date( $args['meta_date'] ) ) . '</span>' ) )
+										: '';
+
+									$date_separator = (( 'on' === $args['show_author'] || 'on' === $args['show_date'] ) && 'on' === $args['show_categories'] )
+										? ' | '
+										: '';
+
+									$categories = 'on' === $args['show_categories']
+										? get_the_category_list(', ')
+										: '';
+
+									$categories_separator = (( 'on' === $args['show_author'] || 'on' === $args['show_date'] || 'on' === $args['show_categories'] ) && 'on' === $args['show_comments'])
+										? ' | '
+										: '';
+
+									$comments = 'on' === $args['show_comments']
+										? sprintf( esc_html( _nx( '%s Comment', '%s Comments', get_comments_number(), 'number of comments', 'et_builder' ) ), number_format_i18n( get_comments_number() ) )
+										: '';
+
+									printf( '<p class="post-meta">%1$s %2$s %3$s %4$s %5$s %6$s %7$s</p>',
+										et_core_esc_previously( $author ),
+										et_core_intentionally_unescaped( $author_separator, 'fixed_string' ),
+										et_core_esc_previously( $date ),
+										et_core_intentionally_unescaped( $date_separator, 'fixed_string' ),
+										et_core_esc_wp( $categories ),
+										et_core_intentionally_unescaped( $categories_separator, 'fixed_string' ),
+										et_core_esc_previously( $comments )
+									);
+								}
+
+								$post_content = et_strip_shortcodes( et_delete_post_first_video( get_the_content() ), true );
+
+								// reset the fb processing flag
+								$et_fb_processing_shortcode_object = false;
+								// set the flag to indicate that we're processing internal content
+								$et_pb_rendering_column_content = true;
+								// reset all the attributes required to properly generate the internal styles
+								ET_Builder_Element::clean_internal_modules_styles();
+
+								echo '<div class="post-content">';
+
+								if ( 'on' === $args['show_content'] ) {
+									global $more;
+
+									// page builder doesn't support more tag, so display the_content() in case of post made with page builder
+									if ( et_pb_is_pagebuilder_used( get_the_ID() ) ) {
+										$more = 1; // phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited
+
+										echo et_core_intentionally_unescaped( apply_filters( 'the_content', $post_content ), 'html' );
+
+									} else {
+										$more = null; // phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited
+										echo et_core_intentionally_unescaped( apply_filters( 'the_content', et_delete_post_first_video( get_the_content( esc_html__( 'read more...', 'et_builder' ) ) ) ), 'html' );
+									}
+								} else {
+									if ( has_excerpt() ) {
+										the_excerpt();
+									} else {
+										if ( '' !== $post_content ) {
+											// set the $et_fb_processing_shortcode_object to false, to retrieve the content inside truncate_post() correctly
+											$et_fb_processing_shortcode_object = false;
+											echo et_core_intentionally_unescaped( wpautop( et_delete_post_first_video( strip_shortcodes( truncate_post( 270, false, '', true ) ) ) ), 'html' );
+											// reset the $et_fb_processing_shortcode_object to its original value
+											$et_fb_processing_shortcode_object = $global_processing_original_value;
+										} else {
+											echo '';
+										}
+									}
+								}
+
+								$et_fb_processing_shortcode_object = $global_processing_original_value;
+								// retrieve the styles for the modules inside Blog content
+								$internal_style = ET_Builder_Element::get_style( true );
+								// reset all the attributes after we retrieved styles
+								ET_Builder_Element::clean_internal_modules_styles( false );
+								$et_pb_rendering_column_content = false;
+								// append styles to the blog content
+								if ( $internal_style ) {
+									printf(
+										'<style type="text/css" class="et_fb_blog_inner_content_styles">
+											%1$s
+										</style>',
+										et_core_esc_previously( $internal_style )
+									);
+								}
+
+								echo '</div>';
+
+								if ( 'on' !== $args['show_content'] ) {
+									$more = 'on' === $args['show_more'] ? sprintf( ' <a href="%1$s" class="more-link" >%2$s</a>' , esc_url( get_permalink() ), esc_html__( 'read more', 'et_builder' ) )  : ''; //phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited
+									echo et_core_esc_previously( $more );
+								}
+								?>
+						<?php } // 'off' === $fullwidth || ! in_array( $post_format, array( 'link', 'audio', 'quote', 'gallery' ?>
+					</article>
+				<?php
+
+				$et_fb_processing_shortcode_object = $global_processing_original_value;
+			} // endwhile
+
+			if ( 'on' !== $args['fullwidth'] ) {
+				echo '</div>';
+			}
+
+			if ( 'on' === $args['show_pagination'] && ! $is_search ) {
+				// echo '</div> <!-- .et_pb_posts -->'; // @todo this causes closing tag issue
+
+				$container_is_closed = true;
+
+				if ( function_exists( 'wp_pagenavi' ) ) {
+					wp_pagenavi( array(
+						'query' => $query
+					) );
+				} else {
+					if ( $et_is_builder_plugin_active ) {
+						include( ET_BUILDER_PLUGIN_DIR . 'includes/navigation.php' );
+					} else {
+						get_template_part( 'includes/navigation', 'index' );
+					}
+				}
+			}
+
+			wp_reset_query();
+		}
+
+		wp_reset_postdata();
+
+		// Reset $wp_query to its origin
+		$wp_query = $wp_query_page; // phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited
+
+		if ( ! $posts = ob_get_clean() ) {
+			$posts = self::get_no_results_template();
+		}
+
+		return $posts;
+	}
 
 	function render( $attrs, $content = null, $render_slug ) {
 		global $post;
@@ -681,12 +1034,8 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 			$background_layout = 'light';
 		}
 
-		$args = array( 
-			'posts_per_page' => (int) $posts_number,
-			'post_type' => 'post',
-			'tax_query' => array(
-			),
-		 );
+		$args = array( 'posts_per_page' => (int) $posts_number );
+		$args['tax_query'] = array();
 
 		$et_paged = is_front_page() ? get_query_var( 'page' ) : get_query_var( 'paged' );
 
@@ -750,15 +1099,15 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 
 		query_posts( $args );
 
-		// echo $include_provinces;
-		// echo "</br/>";
-		// print_r($args);
-
 		if ( have_posts() ) {
-
 			if ( 'off' === $fullwidth ) {
 				echo '<div class="et_pb_salvattore_content" data-columns>';
 			}
+
+			// echo "<pre>";
+			// var_dump($args);
+			// echo "</pre>";
+
 
 			while ( have_posts() ) {
 				the_post();
@@ -780,6 +1129,12 @@ class ET_Builder_Module_Blog_Custom extends ET_Builder_Module_Type_PostBased {
 				$thumb = $thumbnail['thumb'];
 
 				$no_thumb_class = '' === $thumb || 'off' === $show_thumbnail ? ' et_pb_no_thumb' : '';
+
+				$term_id = (get_the_terms(get_the_ID(), "region"))[0]->term_id;
+
+				// echo "<pre>";
+				// var_dump($term_id);
+				// echo "</pre>";
 
 				if ( in_array( $post_format, array( 'video', 'gallery' ) ) ) {
 					$no_thumb_class = '';

@@ -58,16 +58,43 @@
                      <?php if ( ( 'off' !== $show_default_title && $is_page_builder_used ) || ! $is_page_builder_used ) { ?>
                          <div class="et_post_meta_wrapper">
                              <h1 class="entry-title"><?php the_title(); ?></h1>
- 
+
                             <?php if ( ! post_password_required() ) : ?>
                                 <?php if ( in_category('SilipBalita') ) { ?>
                                     <div class="post_meta_custom">
-                                        <p>
+                                        <p> 
                                             <!--<strong>By: </strong><?php the_author(); ?> <br/>-->
                                             <strong>Region: </strong><?php echo get_the_term_list( $post->ID, 'region', '', ', ', '' ); ?> <br/>
                                             <strong>Province: </strong><?php echo get_the_term_list( $post->ID, 'province', '', ', ', '' ); ?> <br/>
                                         </p>
                                     </div>
+
+                                    <?php 
+                                        $thumb = '';
+        
+                                        $width = (int) apply_filters( 'et_pb_index_blog_image_width', 1080 );
+        
+                                        $height = (int) apply_filters( 'et_pb_index_blog_image_height', 675 );
+                                        $classtext = 'et_featured_image';
+                                        $titletext = get_the_title();
+                                        $thumbnail = get_thumbnail( $width, $height, $classtext, $titletext, $titletext, false, 'Blogimage' );
+                                        $thumb = $thumbnail["thumb"];
+        
+                                        $post_format = et_pb_post_format();
+        
+                                        if ( 'video' === $post_format && false !== ( $first_video = et_get_first_video() ) ) {
+                                            printf(
+                                                '<div class="et_main_video_container">
+                                                    %1$s
+                                                </div>',
+                                                et_core_esc_previously( $first_video )
+                                            );
+                                        } else if ( ! in_array( $post_format, array( 'gallery', 'link', 'quote' ) ) && 'on' === et_get_option( 'divi_thumbnails', 'on' ) && '' !== $thumb ) {
+                                            print_thumbnail( $thumb, $thumbnail["use_timthumb"], $titletext, $width, $height );
+                                        } else if ( 'gallery' === $post_format ) {
+                                            et_pb_gallery_images();
+                                        }
+                                    ?> 
                                     <?php the_content(); ?>
                                     <div id="tabs">
                                         <ul>
@@ -111,106 +138,113 @@
                                 
                                 
                                 <!-- --- -->
-                                
-                                <?php 
-                                 $thumb = '';
- 
-                                 $width = (int) apply_filters( 'et_pb_index_blog_image_width', 1080 );
- 
-                                 $height = (int) apply_filters( 'et_pb_index_blog_image_height', 675 );
-                                 $classtext = 'et_featured_image';
-                                 $titletext = get_the_title();
-                                 $thumbnail = get_thumbnail( $width, $height, $classtext, $titletext, $titletext, false, 'Blogimage' );
-                                 $thumb = $thumbnail["thumb"];
- 
-                                 $post_format = et_pb_post_format();
- 
-                                 if ( 'video' === $post_format && false !== ( $first_video = et_get_first_video() ) ) {
-                                     printf(
-                                         '<div class="et_main_video_container">
-                                             %1$s
-                                         </div>',
-                                         et_core_esc_previously( $first_video )
-                                     );
-                                 } else if ( ! in_array( $post_format, array( 'gallery', 'link', 'quote' ) ) && 'on' === et_get_option( 'divi_thumbnails', 'on' ) && '' !== $thumb ) {
-                                     print_thumbnail( $thumb, $thumbnail["use_timthumb"], $titletext, $width, $height );
-                                 } else if ( 'gallery' === $post_format ) {
-                                     et_pb_gallery_images();
-                                 }
-                             ?>
 
                                 <?php if ( in_category('SilipKainan') || in_category('SilipTulugan') || in_category('SilipPasyalan') ) { ?>
+
+                                    <?php 
+                                        $thumb = '';
+        
+                                        $width = (int) apply_filters( 'et_pb_index_blog_image_width', 1080 );
+        
+                                        $height = (int) apply_filters( 'et_pb_index_blog_image_height', 675 );
+                                        $classtext = 'et_featured_image';
+                                        $titletext = get_the_title();
+                                        $thumbnail = get_thumbnail( $width, $height, $classtext, $titletext, $titletext, false, 'Blogimage' );
+                                        $thumb = $thumbnail["thumb"];
+        
+                                        $post_format = et_pb_post_format();
+        
+                                        if ( 'video' === $post_format && false !== ( $first_video = et_get_first_video() ) ) {
+                                            printf(
+                                                '<div class="et_main_video_container">
+                                                    %1$s
+                                                </div>',
+                                                et_core_esc_previously( $first_video )
+                                            );
+                                        } else if ( ! in_array( $post_format, array( 'gallery', 'link', 'quote' ) ) && 'on' === et_get_option( 'divi_thumbnails', 'on' ) && '' !== $thumb ) {
+                                            print_thumbnail( $thumb, $thumbnail["use_timthumb"], $titletext, $width, $height );
+                                        } else if ( 'gallery' === $post_format ) {
+                                            et_pb_gallery_images();
+                                        }
+                                    ?> 
+
                                     <?php the_content(); ?>
                                     <div class="slp-knn_content">
                                         <hr/>
                                         <div>
-                                            <br/>
                                             <label><strong>About <?php the_title() ?></strong></label>
                                             <br/>
-                                            <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-description', true)) {?>
-                                                <p><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-description', true); ?></p>
-                                            <?php }; ?>  
+                                            <!--|| in_category('SilipTulugan')  -->
                                         </div>
                                         <br/>
                                         <div>
-                                            <label><strong>Address:</strong></label>
                                             <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-address', true)) {?>
+                                                <label><strong>Address:</strong></label>
                                                 <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-address', true); ?></span>
                                             <?php }; ?>  
                                         </div>
                                         <div>
-                                            <label><strong>Email:</strong></label>
                                             <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-email', true)) {?>
+                                                <label><strong>Email:</strong></label>
                                                 <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-email', true); ?></span>
                                             <?php }; ?>  
                                         </div>
                                         <div>
-                                            <label><strong>Amenities:</strong></label>
                                             <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-amenities', true)) {?>
+                                                <label><strong>Amenities:</strong></label>
                                                 <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-amenities', true); ?></span>
                                             <?php }; ?>  
                                         </div>
                                         <div>
-                                            <label><strong>Extras:</strong></label>
                                             <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-extras', true)) {?>
+                                                <label><strong>Extras:</strong></label>
                                                 <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-extras', true); ?></span>
                                             <?php }; ?>  
                                         </div>
                                         
                                         <div>
-                                            <label><strong>Landmarks:</strong></label>
                                             <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-nearest-landmark', true)) {?>
+                                                <label><strong>Landmarks:</strong></label>
                                                 <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-nearest-landmark', true); ?></span>
                                             <?php }; ?>  
                                         </div>
                                         <div>
-                                            <label><strong>Operating Hours:</strong></label>
                                             <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-operating-hours', true)) {?>
+                                                <label><strong>Operating Hours:</strong></label>
                                                 <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-operating-hours', true); ?></span>
                                             <?php }; ?>  
                                         </div>
                                         <div>
-                                            <label><strong>Phone No.:</strong></label>
                                             <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-phone-no', true)) {?>
+                                                <label><strong>Phone No.:</strong></label>
                                                 <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-phone-no', true); ?></span>
                                             <?php }; ?>  
                                         </div>
                                         <div>
-                                            <label><strong>Promos:</strong></label>
                                             <?php if(get_post_meta(get_the_ID(), 'wpcf-restaurant-promos', true)) {?>
+                                                <label><strong>Promos:</strong></label>
                                                 <span><?php echo get_post_meta(get_the_ID(), 'wpcf-restaurant-promos', true); ?></span>
                                             <?php }; ?>  
                                         </div>
                                     </div>
-                                    <div class="slp-knn_images"> 
+                                    <!-- <div class="slp-knn_images"> 
                                         <?php if(get_post_meta(get_the_ID(), 'wpcf-image-1', true)) {?>
                                             <img src="<?php echo get_post_meta(get_the_ID(), 'wpcf-image-1', true); ?>" />
                                         <?php }; ?>  
                                         <?php if(get_post_meta(get_the_ID(), 'wpcf-image-2', true)) {?>
                                             <img src="<?php echo get_post_meta(get_the_ID(), 'wpcf-image-2', true); ?>" />
                                         <?php }; ?>  
+                                    </div> -->
+                                <?php }; ?> 
+                                    
+                                <?php if ( in_category('Announcements') || in_category('More Updates') ) { ?>
+                                    <div class="entry-content">
+                                        <div> <?php echo (types_render_field('announcement-image', array() ));?> </div>
+                                        <br/>
+                                        <div> <?php echo (types_render_field('announcement-content', array() ));?> </div>
                                     </div>
                                 <?php }; ?> 
+
  
                              <?php
                                  $text_color_class = et_divi_get_post_text_color();
