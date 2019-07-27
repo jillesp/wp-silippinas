@@ -531,7 +531,7 @@ class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBa
 				),
 			),
 			'include_municipals' => array(
-				'label'            => esc_html__( 'Include Municipals', 'et_builder' ),
+				'label'            => esc_html__( 'Include Municipalities', 'et_builder' ),
 				'type'             => 'municipals',
 				'option_category'  => 'basic_option',
 				'renderer_options' => array(

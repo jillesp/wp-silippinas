@@ -1848,7 +1848,7 @@ if ( ! function_exists( 'et_builder_include_capitals_option' ) ) :
 		$cats_array = get_terms( $args['term_name'], $term_args );
 		$cats_array = array_merge( $custom_items, $cats_array );
 	
-		$output .= '<select name="et_pb_include_capitals" id="et_pb_include_capitals">';
+		$output .= '<select name="et_pb_include_capitals" id="et_pb_include_capitals"><option name="_blank" selected="selected" value=""> </option>';
 
 		foreach ( $cats_array as $capital ) {
 			$selected = sprintf(
@@ -1908,7 +1908,7 @@ if ( ! function_exists( 'et_builder_include_municipals_option' ) ) :
 			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
 		}
 	
-		$output .= '<select name="et_pb_include_municipals" id="et_pb_include_municipals">';
+		$output .= '<select name="et_pb_include_municipals" id="et_pb_include_municipals"><option name="_blank" selected="selected" value=""> </option>';
 
 		foreach ( $cats_array as $municipal ) {
 			$selected = sprintf(
@@ -1967,7 +1967,7 @@ if ( ! function_exists( 'et_builder_include_barangays_option' ) ) :
 			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
 		}
 	
-		$output .= '<select name="et_pb_include_barangays" id="et_pb_include_barangays">';
+		$output .= '<select name="et_pb_include_barangays" id="et_pb_include_barangays"><option name="_blank" selected="selected" value=""> </option>';
 
 		foreach ( $cats_array as $barangay ) {
 			$selected = sprintf(
