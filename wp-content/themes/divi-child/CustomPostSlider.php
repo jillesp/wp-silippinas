@@ -538,6 +538,7 @@ class ET_Builder_Module_Post_Slider_Custom extends ET_Builder_Module_Type_PostBa
 					'use_terms' => false,
 				),
 				'description'      => esc_html__( 'Choose which BLAH you would like to include in the slider.', 'et_builder' ),
+				'description'      => esc_html__( 'Choose which municipality you would like to include in the slider.', 'et_builder' ),
 				'toggle_slug'      => 'main_content',
 				'computed_affects' => array(
 					'__posts',
