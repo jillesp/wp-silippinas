@@ -1698,6 +1698,308 @@ function et_fb_disable_product_tour() {
 }
 endif;
 
+
+/**
+ * Generate output string for `include_regions` option used in backbone template.
+ * @param array
+ * @return string
+ */
+if ( ! function_exists( 'et_builder_include_regions_option' ) ) :
+	function et_builder_include_regions_option( $args = array(), $default_region = '' ) {
+		$custom_items = array();
+	
+		if ( !empty( $args['custom_items'] ) ) {
+			$custom_items = $args['custom_items'];
+			unset($args['custom_items']);
+		}
+	
+		$defaults = apply_filters( 'et_builder_include_regions_defaults', array (
+			'use_terms'  => true,
+			'term_name'  => 'region',
+			'field_name' => 'et_pb_include_regions',
+		) );
+	
+		$args               = wp_parse_args( $args, $defaults );
+		$args['field_name'] = esc_attr( $args['field_name'] );
+	
+		$term_args = apply_filters( 'et_builder_include_regions_option_args', array( 'hide_empty' => false, ) );
+	
+		$output = "\t" . "<% var {$args['field_name']}_temp = typeof data !== 'undefined' && typeof data.{$args['field_name']} !== 'undefined' ? data.{$args['field_name']}.split( ',' ) : ['" . esc_html( $default_region ) . "']; {$args['field_name']}_temp = typeof data === 'undefined' && typeof {$args['field_name']} !== 'undefined' ? {$args['field_name']}.split( ',' ) : {$args['field_name']}_temp; %>" . "\n";
+	
+		$cats_array = get_terms( $args['term_name'], $term_args );
+		
+		$cats_array = array_merge( $custom_items, $cats_array );
+	
+		if ( empty( $cats_array ) ) {
+			$taxonomy_type = $args['use_terms'] ? $args['term_name'] : 'region';
+			$taxonomy = get_taxonomy( $taxonomy_type );
+			$labels = get_taxonomy_labels( $taxonomy );
+			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
+		}
+	
+		foreach ( $cats_array as $region ) {
+			$contains = sprintf(
+				"<%%= _.contains( {$args['field_name']}_temp, '%1\$s' ) ? checked='checked' : '' %%>",
+				is_array( $region ) ? esc_html( $region['term_id'] ) : esc_html( $region->term_id )
+			);
+	
+			$output .= sprintf(
+				'%4$s<label><input type="checkbox" name="%5$s" value="%1$s"%3$s> %2$s</label><br/>',
+				is_array( $region ) ? esc_html( $region['term_id'] ) : esc_html( $region->term_id ),
+				is_array( $region ) ? esc_html( $region['name'] ) : esc_html( $region->name ),
+				$contains,
+				"\n\t\t\t\t\t",
+				$args['field_name']
+			);
+		}
+	
+		$output = "<div id='{$args['field_name']}'>" . $output . '</div>';
+	
+		return apply_filters( 'et_builder_include_regions_option_html', $output );
+	}
+	endif;
+
+	/**
+ * Generate output string for `include_provinces` option used in backbone template.
+ * @param array
+ * @return string
+ */
+if ( ! function_exists( 'et_builder_include_provinces_option' ) ) :
+	function et_builder_include_provinces_option( $args = array(), $default_province = '' ) {
+		$custom_items = array();
+	
+		if ( !empty( $args['custom_items'] ) ) {
+			$custom_items = $args['custom_items'];
+			unset($args['custom_items']);
+		}
+	
+		$defaults = apply_filters( 'et_builder_include_provinces_defaults', array (
+			'use_terms'  => true,
+			'term_name'  => 'province',
+			'field_name' => 'et_pb_include_provinces',
+		) );
+	
+		$args               = wp_parse_args( $args, $defaults );
+		$args['field_name'] = esc_attr( $args['field_name'] );
+	
+		$term_args = apply_filters( 'et_builder_include_provinces_option_args', array( 'hide_empty' => false, ) );
+	
+		$output = "\t" . "<% var {$args['field_name']}_temp = typeof data !== 'undefined' && typeof data.{$args['field_name']} !== 'undefined' ? data.{$args['field_name']}.split( ',' ) : ['" . esc_html( $default_province ) . "']; {$args['field_name']}_temp = typeof data === 'undefined' && typeof {$args['field_name']} !== 'undefined' ? {$args['field_name']}.split( ',' ) : {$args['field_name']}_temp; %>" . "\n";
+	
+		$cats_array = get_terms( $args['term_name'], $term_args );
+		
+		$cats_array = array_merge( $custom_items, $cats_array );
+	
+		if ( empty( $cats_array ) ) {
+			$taxonomy_type = $args['use_terms'] ? $args['term_name'] : 'province';
+			$taxonomy = get_taxonomy( $taxonomy_type );
+			$labels = get_taxonomy_labels( $taxonomy );
+			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
+		}
+	
+		foreach ( $cats_array as $province ) {
+			$contains = sprintf(
+				"<%%= _.contains( {$args['field_name']}_temp, '%1\$s' ) ? checked='checked' : '' %%>",
+				is_array( $province ) ? esc_html( $province['term_id'] ) : esc_html( $province->term_id )
+			);
+	
+			$output .= sprintf(
+				'%4$s<label><input type="checkbox" name="%5$s" value="%1$s"%3$s> %2$s</label><br/>',
+				is_array( $province ) ? esc_html( $province['term_id'] ) : esc_html( $province->term_id ),
+				is_array( $province ) ? esc_html( $province['name'] ) : esc_html( $province->name ),
+				$contains,
+				"\n\t\t\t\t\t",
+				$args['field_name']
+			);
+		}
+	
+		$output = "<div id='{$args['field_name']}'>" . $output . '</div>';
+	
+		return apply_filters( 'et_builder_include_provinces_option_html', $output );
+	}
+	endif;
+
+	/**
+ * Generate output string for `include_capitals` option used in backbone template.
+ * @param array
+ * @return string
+ */
+if ( ! function_exists( 'et_builder_include_capitals_option' ) ) :
+	function et_builder_include_capitals_option( $args = array(), $default_capital = '' ) {
+		$custom_items = array();
+	
+		if ( !empty( $args['custom_items'] ) ) {
+			$custom_items = $args['custom_items'];
+			unset($args['custom_items']);
+		}
+	
+		$defaults = apply_filters( 'et_builder_include_capitals_defaults', array (
+			'use_terms'  => true,
+			'term_name'  => 'capital',
+			'field_name' => 'et_pb_include_capitals',
+		) );
+	
+		$args               = wp_parse_args( $args, $defaults );
+		$args['field_name'] = esc_attr( $args['field_name'] );
+	
+		$term_args = apply_filters( 'et_builder_include_capitals_option_args', array( 'hide_empty' => false, ) );
+	
+		$output = "\t" . "<% var {$args['field_name']}_temp = typeof data !== 'undefined' && typeof data.{$args['field_name']} !== 'undefined' ? data.{$args['field_name']}.split( ',' ) : ['" . esc_html( $default_capital ) . "']; {$args['field_name']}_temp = typeof data === 'undefined' && typeof {$args['field_name']} !== 'undefined' ? {$args['field_name']}.split( ',' ) : {$args['field_name']}_temp; %>" . "\n";
+	
+		$cats_array = get_terms( $args['term_name'], $term_args );
+		
+		$cats_array = array_merge( $custom_items, $cats_array );
+	
+		if ( empty( $cats_array ) ) {
+			$taxonomy_type = $args['use_terms'] ? $args['term_name'] : 'capital';
+			$taxonomy = get_taxonomy( $taxonomy_type );
+			$labels = get_taxonomy_labels( $taxonomy );
+			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
+		}
+	
+		foreach ( $cats_array as $capital ) {
+			$contains = sprintf(
+				"<%%= _.contains( {$args['field_name']}_temp, '%1\$s' ) ? checked='checked' : '' %%>",
+				is_array( $capital ) ? esc_html( $capital['term_id'] ) : esc_html( $capital->term_id )
+			);
+	
+			$output .= sprintf(
+				'%4$s<label><input type="checkbox" name="%5$s" value="%1$s"%3$s> %2$s</label><br/>',
+				is_array( $capital ) ? esc_html( $capital['term_id'] ) : esc_html( $capital->term_id ),
+				is_array( $capital ) ? esc_html( $capital['name'] ) : esc_html( $capital->name ),
+				$contains,
+				"\n\t\t\t\t\t",
+				$args['field_name']
+			);
+		}
+	
+		$output = "<div id='{$args['field_name']}'>" . $output . '</div>';
+	
+		return apply_filters( 'et_builder_include_capitals_option_html', $output );
+	}
+	endif;
+
+	/**
+ * Generate output string for `include_municipals` option used in backbone template.
+ * @param array
+ * @return string
+ */
+if ( ! function_exists( 'et_builder_include_municipals_option' ) ) :
+	function et_builder_include_municipals_option( $args = array(), $default_municipal = '' ) {
+		$custom_items = array();
+	
+		if ( !empty( $args['custom_items'] ) ) {
+			$custom_items = $args['custom_items'];
+			unset($args['custom_items']);
+		}
+	
+		$defaults = apply_filters( 'et_builder_include_municipals_defaults', array (
+			'use_terms'  => true,
+			'term_name'  => 'municipal',
+			'field_name' => 'et_pb_include_municipals',
+		) );
+	
+		$args               = wp_parse_args( $args, $defaults );
+		$args['field_name'] = esc_attr( $args['field_name'] );
+	
+		$term_args = apply_filters( 'et_builder_include_municipals_option_args', array( 'hide_empty' => false, ) );
+	
+		$output = "\t" . "<% var {$args['field_name']}_temp = typeof data !== 'undefined' && typeof data.{$args['field_name']} !== 'undefined' ? data.{$args['field_name']}.split( ',' ) : ['" . esc_html( $default_municipal ) . "']; {$args['field_name']}_temp = typeof data === 'undefined' && typeof {$args['field_name']} !== 'undefined' ? {$args['field_name']}.split( ',' ) : {$args['field_name']}_temp; %>" . "\n";
+	
+		$cats_array = get_terms( $args['term_name'], $term_args );
+		
+		$cats_array = array_merge( $custom_items, $cats_array );
+	
+		if ( empty( $cats_array ) ) {
+			$taxonomy_type = $args['use_terms'] ? $args['term_name'] : 'municipal';
+			$taxonomy = get_taxonomy( $taxonomy_type );
+			$labels = get_taxonomy_labels( $taxonomy );
+			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
+		}
+	
+		foreach ( $cats_array as $municipal ) {
+			$contains = sprintf(
+				"<%%= _.contains( {$args['field_name']}_temp, '%1\$s' ) ? checked='checked' : '' %%>",
+				is_array( $municipal ) ? esc_html( $municipal['term_id'] ) : esc_html( $municipal->term_id )
+			);
+	
+			$output .= sprintf(
+				'%4$s<label><input type="checkbox" name="%5$s" value="%1$s"%3$s> %2$s</label><br/>',
+				is_array( $municipal ) ? esc_html( $municipal['term_id'] ) : esc_html( $municipal->term_id ),
+				is_array( $municipal ) ? esc_html( $municipal['name'] ) : esc_html( $municipal->name ),
+				$contains,
+				"\n\t\t\t\t\t",
+				$args['field_name']
+			);
+		}
+	
+		$output = "<div id='{$args['field_name']}'>" . $output . '</div>';
+	
+		return apply_filters( 'et_builder_include_municipals_option_html', $output );
+	}
+	endif;
+
+	/**
+ * Generate output string for `include_barangays` option used in backbone template.
+ * @param array
+ * @return string
+ */
+if ( ! function_exists( 'et_builder_include_barangays_option' ) ) :
+	function et_builder_include_barangays_option( $args = array(), $default_barangay = '' ) {
+		$custom_items = array();
+	
+		if ( !empty( $args['custom_items'] ) ) {
+			$custom_items = $args['custom_items'];
+			unset($args['custom_items']);
+		}
+	
+		$defaults = apply_filters( 'et_builder_include_barangays_defaults', array (
+			'use_terms'  => true,
+			'term_name'  => 'barangay',
+			'field_name' => 'et_pb_include_barangays',
+		) );
+	
+		$args               = wp_parse_args( $args, $defaults );
+		$args['field_name'] = esc_attr( $args['field_name'] );
+	
+		$term_args = apply_filters( 'et_builder_include_barangays_option_args', array( 'hide_empty' => false, ) );
+	
+		$output = "\t" . "<% var {$args['field_name']}_temp = typeof data !== 'undefined' && typeof data.{$args['field_name']} !== 'undefined' ? data.{$args['field_name']}.split( ',' ) : ['" . esc_html( $default_barangay ) . "']; {$args['field_name']}_temp = typeof data === 'undefined' && typeof {$args['field_name']} !== 'undefined' ? {$args['field_name']}.split( ',' ) : {$args['field_name']}_temp; %>" . "\n";
+	
+		$cats_array = get_terms( $args['term_name'], $term_args );
+		
+		$cats_array = array_merge( $custom_items, $cats_array );
+	
+		if ( empty( $cats_array ) ) {
+			$taxonomy_type = $args['use_terms'] ? $args['term_name'] : 'barangay';
+			$taxonomy = get_taxonomy( $taxonomy_type );
+			$labels = get_taxonomy_labels( $taxonomy );
+			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
+		}
+	
+		foreach ( $cats_array as $barangay ) {
+			$contains = sprintf(
+				"<%%= _.contains( {$args['field_name']}_temp, '%1\$s' ) ? checked='checked' : '' %%>",
+				is_array( $barangay ) ? esc_html( $barangay['term_id'] ) : esc_html( $barangay->term_id )
+			);
+	
+			$output .= sprintf(
+				'%4$s<label><input type="checkbox" name="%5$s" value="%1$s"%3$s> %2$s</label><br/>',
+				is_array( $barangay ) ? esc_html( $barangay['term_id'] ) : esc_html( $barangay->term_id ),
+				is_array( $barangay ) ? esc_html( $barangay['name'] ) : esc_html( $barangay->name ),
+				$contains,
+				"\n\t\t\t\t\t",
+				$args['field_name']
+			);
+		}
+	
+		$output = "<div id='{$args['field_name']}'>" . $output . '</div>';
+	
+		return apply_filters( 'et_builder_include_barangays_option_html', $output );
+	}
+	endif;
+
+
 /**
  * Generate output string for `include_categories` option used in backbone template.
  * @param array
