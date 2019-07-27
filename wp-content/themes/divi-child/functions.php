@@ -36,8 +36,18 @@ function modify_menu(){
 			$menu_slug = 'edit.php?s&post_status=all&post_type=post&action=-1&m=0&cat='. $category->term_id . '&filter_action=Filter&paged=1&action2=-1';
 			
 			if(  $category->name === "Announcements" || $category->name === "More Updates") {
-				add_menu_page($category->name, $category->name, 'read', $menu_slug, null, $icons[$category->name], 3);
-			} else {
+			    add_menu_page($category->name, '<span style="'. $cat_styles .'">'. $category->count .'</span>' . $category->name, 'read', $menu_slug, null, $icons[$category->name], 3);
+				// add_menu_page($category->name, $category->name, 'read', $menu_slug, null, $icons[$category->name], 3);
+			} else if(  
+                $category->name === "Kapitolyo Announcements" || 
+                $category->name === "Kapitolyo in Action" ||
+                $category->name === "Munisipyo Announcements" ||
+                $category->name === "Munisipyo in Action" ||
+                $category->name === "Barangay Announcements" ||
+                $category->name === "Barangay in Action" 
+            ) {
+			    // nothing happens
+			}  else {
 				add_menu_page($category->name, '<span style="'. $cat_styles .'">'. $category->count .'</span>' . $category->name, 'read', $menu_slug, null, $icons[$category->name], 2);
 			}
 			
@@ -151,6 +161,8 @@ function adminCSS(){
     }
 
 	#postdivrich {display: none;}
+	
+	#adminmenu, #adminmenu .wp-submenu, #adminmenuback, #adminmenuwrap {width: 180px;}
     </style><?php
 }
 
