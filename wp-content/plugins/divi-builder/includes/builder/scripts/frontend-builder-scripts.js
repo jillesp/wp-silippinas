@@ -86,6 +86,7 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				$et_pb_container = $et_slider.find( '.et_pb_container' ),
 				et_pb_container_width = $et_pb_container.width(),
 				is_post_slider = $et_slider.hasClass( 'et_pb_post_slider' ),
+				et_slider_breakpoint = '',
 				stop_slider = false;
 
 				$et_slider.et_animation_running = false;
@@ -93,6 +94,8 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				$.data(el, "et_pb_simple_slider", $et_slider);
 
 				$et_slide.eq(0).addClass( 'et-pb-active-slide' );
+
+				$et_slider.attr('data-active-slide', $et_slide.data('slide-id'));
 
 				if ( ! settings.tabs_animation ) {
 					if ( !$et_slider.hasClass('et_pb_bg_layout_dark') && !$et_slider.hasClass('et_pb_bg_layout_light') ) {
@@ -177,8 +180,6 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 						return false;
 					} );
 				}
-
-				et_maybe_set_controls_color( $et_slide.eq(0) );
 
 				if ( settings.use_carousel && et_slides_number > 1 ) {
 					for ( var i = 1; i <= et_slides_number; i++ ) {
@@ -341,34 +342,6 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 					return 'et_pb_bg_layout_dark';
 				}
 
-				function et_maybe_set_controls_color( $slide ) {
-					var next_slide_dot_color,
-						$arrows,
-						arrows_color;
-
-					if ( typeof $et_slider_controls !== 'undefined' && $et_slider_controls.length ) {
-						next_slide_dot_color = $slide.attr( 'data-dots_color' ) || '';
-
-						if ( next_slide_dot_color !== '' ) {
-							$et_slider_controls.attr( 'style', 'background-color: ' + hex_to_rgba( next_slide_dot_color, '0.3' ) + ';' );
-							$et_slider_controls.filter( '.et-pb-active-control' ).attr( 'style', 'background-color: ' + hex_to_rgba( next_slide_dot_color ) + '!important;' );
-						} else {
-							$et_slider_controls.removeAttr( 'style' );
-						}
-					}
-
-					if ( typeof $et_slider_arrows !== 'undefined' && $et_slider_arrows.length ) {
-						$arrows      = $et_slider_arrows.find( 'a' );
-						arrows_color = $slide.attr( 'data-arrows_color' ) || '';
-
-						if ( arrows_color !== '' ) {
-							$arrows.attr( 'style', 'color: ' + arrows_color + '!important;' );
-						} else {
-							$arrows.css( 'color', 'inherit' );
-						}
-					}
-				}
-
 				// fix the appearance of some modules inside the post slider
 				function et_fix_builder_content() {
 					if ( is_post_slider ) {
@@ -416,25 +389,27 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 					et_fix_slider_height( $et_slider );
 				} );
 
-				$et_slider.et_slider_move_to = function ( direction ) {
-					var $active_slide = $et_slide.eq( et_active_slide );
+				$et_slider.et_slider_move_to = function (direction) {
+					$et_slide = $et_slider.closest_descendent(settings.slide);
+					var $active_slide = $et_slide.eq(et_active_slide);
 
 					$et_slider.et_animation_running = true;
 
-					$et_slider.removeClass('et_slide_transition_to_next et_slide_transition_to_previous').addClass('et_slide_transition_to_' + direction );
+					$et_slider.removeClass('et_slide_transition_to_next et_slide_transition_to_previous').addClass('et_slide_transition_to_' + direction);
 
 					$et_slider.find('.et-pb-moved-slide').removeClass('et-pb-moved-slide');
 
-					if ( direction == 'next' || direction == 'previous' ){
+					if (direction === 'next' || direction === 'previous'){
 
-						if ( direction == 'next' )
-							et_active_slide = ( et_active_slide + 1 ) < et_slides_number ? et_active_slide + 1 : 0;
-						else
-							et_active_slide = ( et_active_slide - 1 ) >= 0 ? et_active_slide - 1 : et_slides_number - 1;
+						if (direction === 'next') {
+							et_active_slide = (et_active_slide + 1) < et_slides_number ? et_active_slide + 1 : 0;
+						} else {
+							et_active_slide = (et_active_slide - 1) >= 0 ? et_active_slide - 1 : et_slides_number - 1;
+						}
 
 					} else {
 
-						if ( et_active_slide == direction ) {
+						if (et_active_slide === direction) {
 							$et_slider.et_animation_running = false;
 							return;
 						}
@@ -443,11 +418,13 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 
 					}
 
+					$et_slider.attr('data-active-slide', $et_slide.eq( et_active_slide ).data('slide-id'));
+
 					if (typeof et_slider_timer !== 'undefined') {
 						clearTimeout(et_slider_timer);
 					}
 
-					var $next_slide	= $et_slide.eq( et_active_slide );
+					var $next_slide	= $et_slide.eq(et_active_slide);
 
 					$et_slider.trigger('slide', {current: $active_slide, next: $next_slide});
 
@@ -510,8 +487,6 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 						$et_slider_carousel_controls.removeClass( settings.control_active_class ).eq( et_active_slide ).addClass( settings.control_active_class );
 
 					if ( ! settings.tabs_animation ) {
-						et_maybe_set_controls_color( $next_slide );
-
 						$next_slide.animate( { opacity : 1 }, et_fade_speed );
 						$active_slide.addClass( 'et_slide_transition' ).css( { 'display' : 'list-item', 'opacity' : 1 } ).animate( { opacity : 0 }, et_fade_speed, function(){
 							var active_slide_layout_bg_color = et_get_bg_layout_color( $active_slide ),
@@ -554,6 +529,23 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 					}
 
 					et_slider_auto_rotate();
+				}
+
+				/**
+				 * Get current active device based on window width size.
+				 *
+				 * @return {String} View mode.
+				 */
+				function et_pb_get_current_window_mode() {
+					var window_width = $et_window.width();
+					var current_mode = 'desktop';
+					if ( window_width <= 980 && window_width > 479 ) {
+						current_mode = 'tablet';
+					} else if ( window_width <= 479 ) {
+						current_mode = 'phone';
+					}
+
+					return current_mode;
 				}
 		};
 
@@ -1148,7 +1140,10 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 					click_goal: false,
 					con_goal: false,
 					con_short: false,
-				};
+				},
+				et_animation_breakpoint = '';
+
+			var grid_containers = $('.et_pb_grid_item').parent().get();
 			var $hover_gutter_modules = $('.et_pb_gutter_hover');
 
 			window.et_pb_slider_init = function( $this_slider ) {
@@ -1325,7 +1320,10 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 
 					$this_el.closest( '.et_pb_preload' ).removeClass( 'et_pb_preload' );
 
-					$this_el.remove();
+					// Only remove when it has opened class.
+					if ($this_el.hasClass("opened")) {
+						$this_el.remove();
+					}
 				} );
 
 				$( 'body' ).addClass( 'et_mobile_device' );
@@ -1401,6 +1399,10 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				$et_lightbox_image.bind( 'click' );
 
 				window.et_pb_image_lightbox_init = function( $et_lightbox_image ) {
+					// Delay the initialization if magnificPopup hasn't finished loading yet.
+					if (!$et_lightbox_image.magnificPopup) {
+						return jQuery(window).on('load', function() {window.et_pb_image_lightbox_init($et_lightbox_image);});
+					}
 					$et_lightbox_image.magnificPopup( {
 						type: 'image',
 						removalDelay: 500,
@@ -1437,6 +1439,12 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 
 					$this_carousel.et_pb_simple_carousel( et_carousel_settings );
 				} );
+			}
+
+			if (grid_containers.length || is_frontend_builder) {
+				$(grid_containers).each(function () {
+					window.et_pb_set_responsive_grid($(this), '.et_pb_grid_item');
+				});
 			}
 
 			if ( $et_pb_fullwidth_portfolio.length || is_frontend_builder ) {
@@ -2116,15 +2124,12 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 						posts_number = isNaN( posts_number_original ) || 0 === posts_number_original ? 4 : posts_number_original,
 						pages = Math.ceil( total_grid_items / posts_number );
 
+					window.et_pb_set_responsive_grid($the_gallery_items_container, '.et_pb_gallery_item');
+
 					set_gallery_grid_pages( $the_gallery, pages );
 
 					var total_grid_items = 0;
 					var _page = 1;
-
-					// Remove existing fillers, if any
-					$the_gallery_items_container.find('.et_pb_gallery_filler').remove();
-					var filler = '<div class="et_pb_gallery_filler"></div>';
-					var fillers_added = 0;
 
 					$the_gallery_items.data('page', '');
 					$the_gallery_items.each(function(i){
@@ -2133,17 +2138,6 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 						var $this = $(this);
 						if ( 0 === parseInt( total_grid_items % posts_number ) ) {
 							$this.data('page', _page);
-							// This is the last item in the current page, since the grid layout is controlled
-							// by css rules using nth-child selectors, we need to make sure the current item
-							// is also the last on its column or else layout might break in other pages.
-							// To do so, we add as many empty filler as needed until the element right margin is 0
-							fillers_added = 0;
-							while (fillers_added < 4 && '0px' !== $this.css('marginRight')) {
-								// We can't possibly need more than 3 fillers for each row, make sure we exit anyway
-								// to prevent infinite loops.
-								fillers_added++;
-								$this.before($(filler));
-							}
 							_page++;
 						} else {
 							$this.data('page', _page);
@@ -2484,8 +2478,17 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 						return;
 					}
 
+					var current_mode        = et_pb_get_current_window_mode();
+					et_animation_breakpoint = current_mode;
+					var suffix              = current_mode !== 'desktop' ? '-' + current_mode : '';
+					var prev_suffix         = current_mode === 'phone' ? '-tablet' : '';
+					var grayscale_value     = $this_map_container.attr( 'data-grayscale' + suffix ) || 0;
+					if ( ! grayscale_value ) {
+						grayscale_value = $this_map_container.attr( 'data-grayscale' + prev_suffix ) || $this_map_container.attr( 'data-grayscale' ) || 0;
+					}
+
 					var $this_map = $this_map_container.children('.et_pb_map'),
-						this_map_grayscale = $this_map_container.attr( 'data-grayscale' ) || 0,
+						this_map_grayscale = grayscale_value,
 						is_draggable = ( et_is_mobile_device && $this_map.data('mobile-dragging') !== 'off' ) || ! et_is_mobile_device,
 						infowindow_active;
 
@@ -2558,16 +2561,24 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 
 			if ( $et_pb_shop.length ) {
 				$et_pb_shop.each( function() {
-					var $this_el = $(this),
-						icon     = $this_el.data('icon') || '';
+					var $this_el    = $(this),
+						icon        = $this_el.data('icon') || '',
+						icon_tablet = $this_el.data('icon-tablet') || '',
+						icon_phone  = $this_el.data('icon-phone') || '',
+						$overlay    = $this_el.find( '.et_overlay' );
 
-					if ( icon === '' ) {
-						return true;
+					// Set data icon and inline icon class.
+					if ( icon !== '' ) {
+						$overlay.attr( 'data-icon', icon ).addClass( 'et_pb_inline_icon' );
 					}
 
-					$this_el.find( '.et_overlay' )
-						.attr( 'data-icon', icon )
-						.addClass( 'et_pb_inline_icon' );
+					if ( icon_tablet !== '' ) {
+						$overlay.attr( 'data-icon-tablet', icon_tablet ).addClass( 'et_pb_inline_icon_tablet' );
+					}
+
+					if ( icon_phone !== '' ) {
+						$overlay.attr( 'data-icon-phone', icon_phone ).addClass( 'et_pb_inline_icon_phone' );
+					}
 				} );
 			}
 
@@ -2603,9 +2614,43 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 			});
 
 			if ( $et_pb_circle_counter.length || is_frontend_builder || $( '.et_pb_ajax_pagination_container' ).length > 0 ) {
-				window.et_pb_circle_counter_init = function($the_counter, animate) {
+				window.et_pb_circle_counter_init = function($the_counter, animate, custom_mode) {
 					if ( $the_counter.width() <= 0 ) {
 						return;
+					}
+
+					// Update animation breakpoint variable and generate suffix.
+					var current_mode        = et_pb_get_current_window_mode();
+					et_animation_breakpoint = current_mode;
+
+					// Custom Mode is used to pass custom preview mode such as hover. Current mode is
+					// actual preview mode based on current window size.
+					var suffix = '';
+					if ('undefined' !== typeof custom_mode && '' !== custom_mode) {
+						suffix = '-' + custom_mode;
+					} else if (current_mode !== 'desktop') {
+						suffix = '-' + current_mode;
+					}
+
+					// Update bar background color based on active mode.
+					var bar_color      = $the_counter.data( 'bar-bg-color' );
+					var mode_bar_color = $the_counter.data( 'bar-bg-color' + suffix );
+					if ( typeof mode_bar_color !== 'undefined' && mode_bar_color !== '' ) {
+						bar_color = mode_bar_color;
+					}
+
+					// Update bar track color based on active mode.
+					var track_color      = $the_counter.data( 'color' ) || '#000000';
+					var mode_track_color = $the_counter.data( 'color' + suffix );
+					if ( typeof mode_track_color !== 'undefined' && mode_track_color !== '' ) {
+						track_color = mode_track_color;
+					}
+
+					// Update bar track color alpha based on active mode.
+					var track_color_alpha      = $the_counter.data( 'alpha' ) || '0.1';
+					var mode_track_color_alpha = $the_counter.data( 'alpha' + suffix );
+					if ('undefined' !== typeof mode_track_color_alpha && '' !== mode_track_color_alpha && !isNaN(mode_track_color_alpha)) {
+						track_color_alpha = mode_track_color_alpha;
 					}
 
 					$the_counter.easyPieChart({
@@ -2614,9 +2659,9 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 							enabled: true
 						},
 						size: 0 !== $the_counter.width() ? $the_counter.width() : 10, // set the width to 10 if actual width is 0 to avoid js errors
-						barColor: $the_counter.data( 'bar-bg-color' ),
-						trackColor: $the_counter.data( 'color' ) || '#000000',
-						trackAlpha: $the_counter.data( 'alpha' ) || '0.1',
+						barColor: bar_color,
+						trackColor: track_color,
+						trackAlpha: track_color_alpha,
 						scaleColor: false,
 						lineWidth: 5,
 						onStart: function() {
@@ -2636,17 +2681,77 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 						var $the_counter = $(this).find('.et_pb_circle_counter_inner');
 						window.et_pb_circle_counter_init($the_counter, false);
 
-						$the_counter.on('containerWidthChanged', function( event ){
+						// Circle Counter on Hover.
+						$the_counter.on('mouseover', function(event){
+							window.et_pb_circle_counter_update($the_counter, event, 'hover');
+						});
+
+						// Circle Counter on "Unhover" as reset of Hover effect.
+						$the_counter.on('mouseleave', function(event){
+							window.et_pb_circle_counter_update($the_counter, event);
+						});
+
+						$the_counter.on('containerWidthChanged', function(event, custom_mode){
 							$the_counter = $( event.target );
 							$the_counter.find('canvas').remove();
 							$the_counter.removeData('easyPieChart' );
-							window.et_pb_circle_counter_init($the_counter, true);
+							window.et_pb_circle_counter_init($the_counter, true, custom_mode);
 						});
 
 					});
 				};
 				window.et_pb_reinit_circle_counters( $et_pb_circle_counter );
 			}
+
+			/**
+			 * Update circle counter easyPieChart data on custom mode.
+			 *
+			 * @since 3.25.3
+			 *
+			 * @param {jQuery} $this_counter Circle counter jQuery element.
+			 * @param {Object} event         Event object
+			 * @param {String} custom_mode   Custom view mode such as hover/desktop/tablet/phone.
+			 */
+			window.et_pb_circle_counter_update = function($this_counter, event, custom_mode) {
+				if (!$this_counter.is(':visible') || typeof $this_counter.data('easyPieChart') === 'undefined') {
+					return;
+				}
+
+				// Check circle attributes value for current event type.
+				if ($(event.target).length > 0) {
+					if ('mouseover' === event.type || 'mouseleave' === event.type) {
+						has_field_value = false;
+
+						// Check if one of those field value exist.
+						var mode_bar_color         = $this_counter.data('bar-bg-color-hover');
+						var mode_track_color       = $this_counter.data('color-hover');
+						var mode_track_color_alpha = $this_counter.data('alpha-hover');
+
+						if (typeof mode_bar_color !== 'undefined' && mode_bar_color !== '') {
+							has_field_value = true;
+						} else if (typeof mode_track_color !== 'undefined' && mode_track_color !== '') {
+							has_field_value = true;
+						} else if (typeof mode_track_color_alpha !== 'undefined' && mode_track_color_alpha !== '') {
+							has_field_value = true;
+						}
+
+						if (!has_field_value) {
+							return;
+						}
+					}
+				}
+
+				// Reinit circle counter for current event.
+				var container_param = [];
+				if ('undefined' !== typeof custom_mode && '' !== custom_mode) {
+					container_param = [custom_mode];
+				}
+				$this_counter.trigger('containerWidthChanged', container_param);
+
+				// Animation should be disabled here.
+				$this_counter.data('easyPieChart').disableAnimation();
+				$this_counter.data('easyPieChart').update($this_counter.data('number-value'));
+			};
 
 			if ( $et_pb_number_counter.length || is_frontend_builder || $( '.et_pb_ajax_pagination_container' ).length > 0 ) {
 				window.et_pb_reinit_number_counters = function( $et_pb_number_counter ) {
@@ -3184,11 +3289,11 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 						$this_el.find('video').removeAttr('style');
 					}
 
-					var el_ratio  = parseFloat( $this_el.attr( 'data-ratio' ) );
-					var el_width  = parseInt( $this_el.find( 'video' ).attr( 'width' ) || $this_el.find( 'video' ).width() );
-					var el_height = parseInt( $this_el.find( 'video' ).attr( 'height' ) || $this_el.find( 'video' ).height() );
+					var $video    = $this_el.find('video');
+					var el_width  = ($video.prop('videoWidth')) || parseInt($video.width());
+					var el_height = ($video.prop('videoHeight')) || parseInt($video.height());
 
-					var ratio = ( ! isNaN( el_ratio ) ) ? el_ratio : ( el_width / el_height );
+					var ratio = el_width / el_height;
 
 					var $video_elements = $this_el.find( '.mejs-video, video, object' ).css( 'margin', 0 );
 
@@ -3914,7 +4019,75 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				return fallback;
 			}
 
-			function et_animate_element( $element ) {
+			/**
+			 * Reinit animation styles on window resize.
+			 *
+			 * It will check current window mode then compare it with the breakpoint of last rendered
+			 * animation styles. If it's different, it will recall et_process_animation_data().
+			 *
+			 * @since 3.23
+			 */
+			function et_pb_reinit_animation() {
+				// If mode is changed, reinit animation data.
+				if ( et_pb_get_current_window_mode() !== et_animation_breakpoint ) {
+					et_process_animation_data( false );
+				}
+			}
+
+			/**
+			 * Update map filters.
+			 *
+			 * @since 3.23
+			 * @since 3.24.1 Prevent reinit maps to update map filters.
+			 *
+			 * @param {jQuery} $et_pb_map
+			 */
+			function et_pb_update_maps_filters($et_pb_map) {
+				// Ensure to update map filters only on preview mode changes.
+				if (et_pb_get_current_window_mode() === et_animation_breakpoint)  {
+					return false;
+				}
+
+				$et_pb_map.each(function(){
+					var $this_map = $(this);
+					var this_map  = $this_map.data('map');
+
+					// Ensure the map exist.
+					if ('undefined' === typeof this_map) {
+						return;
+					}
+
+					var current_mode        = et_pb_get_current_window_mode();
+					et_animation_breakpoint = current_mode;
+					var suffix              = current_mode !== 'desktop' ? '-' + current_mode : '';
+					var prev_suffix         = current_mode === 'phone' ? '-tablet' : '';
+					var grayscale_value     = $this_map.attr('data-grayscale' + suffix) || 0;
+					if (!grayscale_value) {
+						grayscale_value = $this_map.attr('data-grayscale' + prev_suffix) || $this_map.attr('data-grayscale') || 0;
+					}
+
+					// Convert it to negative value as string.
+					if (grayscale_value !== 0) {
+						grayscale_value = '-' + grayscale_value.toString();
+					}
+
+					// Apply grayscale value on the saturation.
+					this_map.setOptions({
+						styles: [{
+							stylers: [
+								{ saturation: parseInt(grayscale_value) }
+							]
+						}]
+					});
+				});
+			}
+
+			function et_animate_element($elementOriginal) {
+				var $element = $elementOriginal;
+				if ($element.hasClass('et_had_animation')) {
+					return;
+				}
+
 				var animation_style            = $element.attr('data-animation-style');
 				var animation_repeat           = $element.attr('data-animation-repeat');
 				var animation_duration         = $element.attr('data-animation-duration');
@@ -3922,6 +4095,7 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				var animation_intensity        = $element.attr('data-animation-intensity');
 				var animation_starting_opacity = $element.attr('data-animation-starting-opacity');
 				var animation_speed_curve      = $element.attr('data-animation-speed-curve');
+				var $buttonWrapper             = $element.parent('.et_pb_button_module_wrapper');
 
 				// Avoid horizontal scroll bar when section is rolled
 				if ($element.is('.et_pb_section') && 'roll' === animation_style) {
@@ -3937,6 +4111,12 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				// Check if the animation speed curve is one of the allowed ones and set it to the default one if it is not
 				if ( $.inArray( animation_speed_curve, ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'] ) === -1 ) {
 					animation_speed_curve = 'ease-in-out';
+				}
+
+				if ($buttonWrapper.length > 0) {
+					$element.removeClass('et_animated');
+					$element = $buttonWrapper;
+					$element.addClass('et_animated');
 				}
 
 				$element.css({
@@ -3966,10 +4146,10 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 					}
 
 					// If it does set the original animation to the base animation type
-					var original_animation = animation;
+					original_animation = animation;
 
 					// Get the remainder of the animation style and set it as the direction
-					var original_direction = animation_style.substr( animation.length, animation_style.length );
+					original_direction = animation_style.substr(animation.length, animation_style.length);
 
 					// If that is not empty convert it to lower case for better readability's sake
 					if ( '' !== original_direction ) {
@@ -4025,14 +4205,36 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 
 						var $animated = $('.' + animation_entry.class);
 
+						// Get current active device.
+						var current_mode    = et_pb_get_current_window_mode();
+						var is_desktop_view = current_mode === 'desktop';
+
+						// Update animation breakpoint variable.
+						et_animation_breakpoint = current_mode;
+
+						// Generate suffix.
+						var suffix = '';
+						if ( ! is_desktop_view ) {
+							suffix += '_' + current_mode;
+						}
+
+						// Being save and prepare the value.
+						var data_style     = ! is_desktop_view && typeof animation_entry['style' + suffix] !== 'undefined' ? animation_entry['style' + suffix] : animation_entry.style;
+						var data_repeat    = ! is_desktop_view && typeof animation_entry['repeat' + suffix] !== 'undefined' ? animation_entry['repeat' + suffix] : animation_entry.repeat;
+						var data_duration  = ! is_desktop_view && typeof animation_entry['duration' + suffix] !== 'undefined' ? animation_entry['duration' + suffix] : animation_entry.duration;
+						var data_delay     = ! is_desktop_view && typeof animation_entry['delay' + suffix] !== 'undefined' ? animation_entry['delay' + suffix] : animation_entry.delay;
+						var data_intensity = ! is_desktop_view && typeof animation_entry['intensity' + suffix] !== 'undefined' ? animation_entry['intensity' + suffix] : animation_entry.intensity;
+						var data_starting_opacity = ! is_desktop_view && typeof animation_entry['starting_opacity' + suffix] !== 'undefined' ? animation_entry['starting_opacity' + suffix] : animation_entry.starting_opacity;
+						var data_speed_curve      = ! is_desktop_view && typeof animation_entry['speed_curve' + suffix] !== 'undefined' ? animation_entry['speed_curve' + suffix] : animation_entry.speed_curve;
+
 						$animated.attr({
-							'data-animation-style'           : animation_entry.style,
-							'data-animation-repeat'          : 'once' === animation_entry.repeat ? '' : 'infinite',
-							'data-animation-duration'        : animation_entry.duration,
-							'data-animation-delay'           : animation_entry.delay,
-							'data-animation-intensity'       : animation_entry.intensity,
-							'data-animation-starting-opacity': animation_entry.starting_opacity,
-							'data-animation-speed-curve'     : animation_entry.speed_curve
+							'data-animation-style'           : data_style,
+							'data-animation-repeat'          : 'once' === data_repeat ? '' : 'infinite',
+							'data-animation-duration'        : data_duration,
+							'data-animation-delay'           : data_delay,
+							'data-animation-intensity'       : data_intensity,
+							'data-animation-starting-opacity': data_starting_opacity,
+							'data-animation-speed-curve'     : data_speed_curve
 						});
 
 						// Process the waypoints logic if the waypoints are not ignored
@@ -4342,7 +4544,7 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 					'zoom', 'zoomTop', 'zoomRight', 'zoomBottom', 'zoomLeft',
 					'flip', 'flipTop', 'flipRight', 'flipBottom', 'flipLeft',
 					'fold', 'foldTop', 'foldRight', 'foldBottom', 'foldLeft',
-					'roll', 'rollTop', 'rollRight', 'rollBottom', 'rollLeft'
+					'roll', 'rollTop', 'rollRight', 'rollBottom', 'rollLeft', 'transformAnim',
 				];
 			}
 
@@ -4365,10 +4567,8 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 
 				// Prevent animation module with no explicit position property to be incorrectly positioned
 				// after animation is clomplete and animation classname is removed because animation classname has
-				// animation-name property which gives pseudo correct z-index.
-				if ('static' === $element.css('position')) {
-					$element.addClass('et_had_animation');
-				}
+				// animation-name property which gives pseudo correct z-index. This class also works as a marker to prevent animating already animated objects.
+				$element.addClass('et_had_animation');
 			}
 
 			function et_remove_animation_data( $element ) {
@@ -4385,7 +4585,7 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				$.each( data_attrs_to_remove, function( index, attr_name ) {
 					$element.removeAttr( attr_name );
 				} );
-			};
+			}
 
 			window.et_reinit_waypoint_modules = et_pb_debounce( function() {
 					var $et_pb_circle_counter = $( '.et_pb_circle_counter' ),
@@ -4562,7 +4762,14 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 									return;
 								}
 
-								window.location = link_option_entry.url;
+								var url = link_option_entry.url;
+
+								if (url && '#' === url[0] && $(url).length) {
+									et_pb_smooth_scroll($(url), undefined, 800);
+									history.pushState(null, "", url);
+								} else {
+									window.location = url;
+								}
 							}
 						});
 
@@ -4744,6 +4951,23 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				return subject_id;
 			}
 
+			/**
+			 * Get current active device based on window width size.
+			 *
+			 * @return {String} View mode.
+			 */
+			function et_pb_get_current_window_mode() {
+				var window_width = $et_window.width();
+				var current_mode = 'desktop';
+				if ( window_width <= 980 && window_width > 479 ) {
+					current_mode = 'tablet';
+				} else if ( window_width <= 479 ) {
+					current_mode = 'phone';
+				}
+
+				return current_mode;
+			}
+
 			function et_pb_set_cookie_expire( days ) {
 				var ms = days*24*60*60*1000;
 
@@ -4807,8 +5031,9 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 
 					fullscreen_section_timeout[section_index] = setTimeout( function() {
 					var $body = $( 'body' ),
+					  has_section = $this_section.length,
 						this_section_index = $this_section.index('.et_pb_fullwidth_header'),
-						this_section_offset = $this_section.offset(),
+						this_section_offset = has_section ? $this_section.offset() : {},
 						$header = $this_section.children('.et_pb_fullwidth_header_container'),
 						$header_content = $header.children('.header-content-container'),
 						$header_image = $header.children('.header-image-container'),
@@ -4823,13 +5048,13 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 						has_main_header = $main_header.length,
 						main_header_height = has_main_header ? $main_header.outerHeight() : 0,
 						fixed_main_header_height = et_pb_get_fixed_main_header_height(),
-						is_mobile_first_module = this_section_offset.top <= (main_header_height + wpadminbar_height),
+						is_mobile_first_module = 'undefined' !== typeof this_section_offset.top ? this_section_offset.top <= (main_header_height + wpadminbar_height) : false,
 						is_wp_relative_admin_bar = $et_window.width() < 782,
 						is_desktop_view = $et_window.width() > 980,
 						is_tablet_view = $et_window.width() <= 980 && $et_window.width() >= 479,
 						is_phone_view = $et_window.width() < 479,
 						overall_header_height = window.et_is_vertical_nav && is_desktop_view ? wpadminbar_height + top_header_height : wpadminbar_height + top_header_height + main_header_height,
-						is_first_module = this_section_offset.top <= overall_header_height;
+						is_first_module = 'undefined' !== typeof this_section_offset.top ? this_section_offset.top <= overall_header_height : false;
 
 					// In case theme stored the onload main-header height as data-attribute
 					if ( $main_header.attr('data-height-onload') ) {
@@ -4999,13 +5224,20 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 					$.proxy( et_calc_fullscreen_section, $( this ) )();
 				});
 
-				$et_window.off('resize', et_calculate_fullscreen_section_size);
-				$et_window.off('et-pb-header-height-calculated', et_calculate_fullscreen_section_size);
+				clearTimeout(et_calc_fullscreen_section.timeout);
 
-				$et_window.trigger('resize');
+				et_calc_fullscreen_section.timeout = setTimeout(function () {
+					$et_window.off('resize', et_calculate_fullscreen_section_size);
+					$et_window.off('et-pb-header-height-calculated', et_calculate_fullscreen_section_size);
 
-				$et_window.on('resize', et_calculate_fullscreen_section_size);
-				$et_window.on('et-pb-header-height-calculated', et_calculate_fullscreen_section_size);
+					$et_window.trigger('resize');
+
+					$et_window.on('resize', et_calculate_fullscreen_section_size);
+					$et_window.on('et-pb-header-height-calculated', et_calculate_fullscreen_section_size);
+				});
+				// 100ms timeout is set to make sure that the fulls screen section size is calculated
+				// This allows the posibility that in some specific cases this may not be enought
+				// so we may need to review this.
 			};
 
 			if (!is_frontend_builder) {
@@ -5090,6 +5322,31 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 								return;
 							}
 
+							// Update animation breakpoint variable and generate suffix.
+							var current_mode        = et_pb_get_current_window_mode();
+							et_animation_breakpoint = current_mode;
+							var suffix              = current_mode !== 'desktop' ? '-' + current_mode : '';
+
+							// Update bar background color based on active mode.
+							var bar_color = $this_counter.data( 'bar-bg-color' + suffix );
+							if ( typeof bar_color !== 'undefined' && bar_color !== '' ) {
+								$this_counter.data('easyPieChart').options.barColor = bar_color;
+							}
+
+							// Update track color based on active mode.
+							var track_color = $this_counter.data( 'color' + suffix );
+							if ( typeof track_color !== 'undefined' && track_color !== '' ) {
+								$this_counter.data('easyPieChart').options.trackColor = track_color;
+								$this_counter.trigger('containerWidthChanged');
+							}
+
+							// Update track color alpha based on active mode.
+							var track_color_alpha = $this_counter.data( 'alpha' + suffix );
+							if ( typeof track_color_alpha !== 'undefined' && track_color_alpha !== '' ) {
+								$this_counter.data('easyPieChart').options.trackAlpha = track_color_alpha;
+								$this_counter.trigger('containerWidthChanged');
+							}
+
 							$this_counter.data('easyPieChart').update( $this_counter.data('number-value') );
 						});
 					}
@@ -5111,6 +5368,20 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 						window.et_bar_counters_init( $( this ) );
 					});
 				} /* $et_pb_counter_amount.length */
+
+				// Reinit animation.
+				isBuilder && et_pb_reinit_animation();
+
+				// Reupdate maps filters.
+				if ($et_pb_map.length || is_frontend_builder) {
+					et_pb_update_maps_filters($et_pb_map);
+				}
+
+				if (grid_containers.length || is_frontend_builder) {
+					$(grid_containers).each(function () {
+						window.et_pb_set_responsive_grid($(this), '.et_pb_grid_item');
+					});
+				}
 			} );
 
 			function fitvids_slider_fullscreen_init() {
@@ -5408,12 +5679,24 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				$( 'html, body' ).animate({
 					scrollTop: ( $current_module.offset().top - ( $( '#main-header' ).innerHeight() + $( '#top-header' ).innerHeight() + 50 ) )
 				});
+
+				//Set classes for gallery and portfolio breakdowns
+				var grid_items = $current_module.find('.et_pb_grid_item');
+				if (grid_items.length) {
+					et_pb_set_responsive_grid($(grid_items.parent().get(0)), '.et_pb_grid_item');
+				}
 			}
 
 			window.et_pb_search_init = function( $search ) {
+				// Update animation breakpoint variable and generate suffix.
+				var current_mode        = et_pb_get_current_window_mode();
+				et_animation_breakpoint = current_mode;
+				var suffix              = current_mode !== 'desktop' ? '-' + current_mode : '';
+
 				var $input_field = $search.find( '.et_pb_s' );
 				var $button = $search.find( '.et_pb_searchsubmit' );
-				var input_padding = $search.hasClass( 'et_pb_text_align_right' ) ? 'paddingLeft' : 'paddingRight';
+				var input_padding = $search.hasClass( 'et_pb_text_align_right' + suffix ) ? 'paddingLeft' : 'paddingRight';
+				var reverse_input_padding = input_padding === 'paddingLeft' ? 'paddingRight' : 'paddingLeft';
 				var disabled_button = $search.hasClass( 'et_pb_hide_search_button' );
 				var buttonHeight = $button.outerHeight();
 				var buttonWidth = $button.outerWidth();
@@ -5427,6 +5710,8 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 				}
 
 				if ( ! disabled_button ) {
+					// Reset reverse input padding.
+					$input_field.css( reverse_input_padding, '' );
 					$input_field.css( input_padding, buttonWidth + 10 );
 				}
 
@@ -5497,6 +5782,16 @@ var isBuilder = 'object' === typeof window.ET_Builder;
 
 					if ( typeof $comments_module.attr( 'data-icon' ) !== 'undefined' && $comments_module.attr( 'data-icon' ) !== '' ) {
 						$comments_module_button.attr( 'data-icon', $comments_module.attr( 'data-icon' ) );
+						$comments_module_button.addClass( 'et_pb_custom_button_icon' );
+					}
+
+					if ( typeof $comments_module.attr( 'data-icon-tablet' ) !== 'undefined' && $comments_module.attr( 'data-icon-tablet' ) !== '' ) {
+						$comments_module_button.attr( 'data-icon-tablet', $comments_module.attr( 'data-icon-tablet' ) );
+						$comments_module_button.addClass( 'et_pb_custom_button_icon' );
+					}
+
+					if ( typeof $comments_module.attr( 'data-icon-phone' ) !== 'undefined' && $comments_module.attr( 'data-icon-phone' ) !== '' ) {
+						$comments_module_button.attr( 'data-icon-phone', $comments_module.attr( 'data-icon-phone' ) );
 						$comments_module_button.addClass( 'et_pb_custom_button_icon' );
 					}
 				}

@@ -12,6 +12,7 @@
   var $etSystemStatusTable             = $('.et_system_status');
   var $etSupportUserToggle             = $('.et_support_user_toggle .et_pb_yes_no_button');
   var $et_documentation_videos_list_li = $('.et_documentation_videos_list li');
+  var $modalSafeModeWarningTemplate    = $('#et-ajax-saving-template').html();
 
   function confirmClipboardCopy() {
     $save_message.addClass('success-animation').fadeIn('fast');
@@ -57,6 +58,7 @@
           return;
         }
 
+        $('.et-remote-access-error').first().hide(showHideDelay);
         $save_message.addClass('et_loading').removeClass('success-animation');
         $save_message.fadeIn('fast');
       },
@@ -73,6 +75,11 @@
         }, removeDelay);
         var $msgExpiry = $('.et-support-user-expiry').first();
         if ('activate' === postData.support_update) {
+          if (response.error) {
+            $('.et-remote-access-error').first().text(response.error).show(showHideDelay);
+            return;
+          }
+          $('#et-remote-access-error').remove();
           $toggle.removeClass('et_pb_off_state').addClass('et_pb_on_state');
           $msgExpiry.attr('data-expiry', response.expiry);
           supportUserTimeToExpiry();
@@ -238,6 +245,7 @@
 
   // Safe Mode: Interrupt Actions when Safe Mode is Active
   function preventActionWhenSafeModeActive() {
+    $('body').append($modalSafeModeWarningTemplate);
     $('.et-core-safe-mode-block-modal').addClass('et-core-active');
     $(window).trigger('et-core-modal-active');
   }
@@ -291,90 +299,91 @@
     /**
      * Support Center :: Remote Access
      */
+    if ($('.card.et_remote_access').length > 0) {
+      // Remote Access: Initial Calculation of Time To Auto-Deactivation
+      supportUserTimeToExpiry();
 
-    // Remote Access: Initial Calculation of Time To Auto-Deactivation
-    supportUserTimeToExpiry();
+      // Remote Access: Recalculate Time To Auto-Deactivation (every 30 seconds)
+      setInterval(supportUserTimeToExpiry, 30000);
 
-    // Remote Access: Recalculate Time To Auto-Deactivation (every 30 seconds)
-    setInterval(supportUserTimeToExpiry, 30000);
-
-    // Remote Access: Display Auto-Deactivation Countdown
-    if ($etSupportUserToggle.hasClass('et_pb_on_state')) {
-      $('.et-support-user-expiry').first().show(0);
-    } else {
-      // If the Support User account toggle is off, send a quick AJAX request to verify the account is deactivated
-      supportUserActivationToggle($etSupportUserToggle, 'deactivate', true);
-    }
-
-    // Remote Access: Activate/Deactivate
-    $etSupportUserToggle.on('click', function(e) {
-      e.preventDefault();
-
-      if ($etSupportUserToggle.hasClass('et_pb_off_state')) {
-        supportUserActivationToggle($(this), 'activate');
-      } else if ($etSupportUserToggle.hasClass('et_pb_on_state')) {
-        supportUserActivationToggle($(this), 'deactivate');
-      }
-    });
-
-    // Remote Access: Elevate/Reset Divi Support user role
-    $('.et_support_user_elevated_toggle .et_pb_yes_no_button').on('click', function(e) {
-      e.preventDefault();
-
-      var $toggle = $(this);
-
-      var postData = {
-        action: 'et_support_user_update',
-        nonce:  etSupportCenter.nonce
-      };
-
-      if ($toggle.hasClass('et_pb_off_state')) {
-        postData.support_update = 'elevate';
-      } else if ($toggle.hasClass('et_pb_on_state')) {
-        postData.support_update = 'activate';
+      // Remote Access: Display Auto-Deactivation Countdown
+      if ($etSupportUserToggle.hasClass('et_pb_on_state')) {
+        $('.et-support-user-expiry').first().show(0);
       } else {
-        return;
+        // If the Support User account toggle is off, send a quick AJAX request to verify the account is deactivated
+        supportUserActivationToggle($etSupportUserToggle, 'deactivate', true);
       }
 
-      // Ajax toggle ET Support User Admin Mode
-      jQuery.ajax({
-        type:       'POST',
-        data:       postData,
-        dataType:   'json',
-        url:        etSupportCenter.ajaxURL,
-        action:     'support_user_update_via_ajax',
-        beforeSend: function(xhr) {
-          $save_message.addClass('et_loading').removeClass('success-animation');
-          $save_message.fadeIn('fast');
-        },
-        success:    function(response) {
-          $save_message.removeClass('et_loading').removeClass('success-animation');
+      // Remote Access: Activate/Deactivate
+      $etSupportUserToggle.on('click', function(e) {
+        e.preventDefault();
 
-          setTimeout(function() {
-            $save_message.fadeOut('slow');
-          }, removeDelay);
-          if ('elevate' === postData.support_update) {
-            $toggle.removeClass('et_pb_off_state').addClass('et_pb_on_state');
-          } else if ('activate' === postData.support_update) {
-            $toggle.removeClass('et_pb_on_state').addClass('et_pb_off_state');
-          }
-          $save_message.addClass('success-animation');
+        if ($etSupportUserToggle.hasClass('et_pb_off_state')) {
+          supportUserActivationToggle($(this), 'activate');
+        } else if ($etSupportUserToggle.hasClass('et_pb_on_state')) {
+          supportUserActivationToggle($(this), 'deactivate');
         }
-      }).fail(function(data) {
-        console.log(data.responseText);
       });
-    });
 
-    // Remote Access: Copy Support Token to clipboard
-    $('body').on('click', '.copy_support_token', function() {
-      var token = $(this).attr('data-token');
-      var $temp = $('<input>');
-      $('body').append($temp);
-      $temp.val(token).select();
-      document.execCommand('copy');
-      $temp.remove();
-      confirmClipboardCopy();
-    });
+      // Remote Access: Elevate/Reset Divi Support user role
+      $('.et_support_user_elevated_toggle .et_pb_yes_no_button').on('click', function(e) {
+        e.preventDefault();
+
+        var $toggle = $(this);
+
+        var postData = {
+          action: 'et_support_user_update',
+          nonce:  etSupportCenter.nonce
+        };
+
+        if ($toggle.hasClass('et_pb_off_state')) {
+          postData.support_update = 'elevate';
+        } else if ($toggle.hasClass('et_pb_on_state')) {
+          postData.support_update = 'activate';
+        } else {
+          return;
+        }
+
+        // Ajax toggle ET Support User Admin Mode
+        jQuery.ajax({
+          type:       'POST',
+          data:       postData,
+          dataType:   'json',
+          url:        etSupportCenter.ajaxURL,
+          action:     'support_user_update_via_ajax',
+          beforeSend: function(xhr) {
+            $save_message.addClass('et_loading').removeClass('success-animation');
+            $save_message.fadeIn('fast');
+          },
+          success:    function(response) {
+            $save_message.removeClass('et_loading').removeClass('success-animation');
+
+            setTimeout(function() {
+              $save_message.fadeOut('slow');
+            }, removeDelay);
+            if ('elevate' === postData.support_update) {
+              $toggle.removeClass('et_pb_off_state').addClass('et_pb_on_state');
+            } else if ('activate' === postData.support_update) {
+              $toggle.removeClass('et_pb_on_state').addClass('et_pb_off_state');
+            }
+            $save_message.addClass('success-animation');
+          }
+        }).fail(function(data) {
+          console.log(data.responseText);
+        });
+      });
+
+      // Remote Access: Copy Support Token to clipboard
+      $('body').on('click', '.copy_support_token', function() {
+        var token = $(this).attr('data-token');
+        var $temp = $('<input>');
+        $('body').append($temp);
+        $temp.val(token).select();
+        document.execCommand('copy');
+        $temp.remove();
+        confirmClipboardCopy();
+      });
+    }
 
     /**
      * Support Center :: Documentation & Help
@@ -444,6 +453,12 @@
     $('body.et-safe-mode-active.plugins-php').on('click', '.page-title-action', function(e) {
       e.preventDefault();
       preventActionWhenSafeModeActive();
+    });
+
+    // Safe Mode: Close Interrupt
+    $('body').on('click', '>.et-core-safe-mode-block-modal .et-core-modal-close', function(e) {
+      e.preventDefault();
+      $('body>.et-core-safe-mode-block-modal').remove();
     });
 
     /**

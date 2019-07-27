@@ -2,8 +2,8 @@
 /*
  * Plugin Name: Divi Builder
  * Plugin URI: http://elegantthemes.com
- * Description: A drag and drop page builder for any WordPress theme.
- * Version: 2.21.2
+ * Description: The ultimate WordPress page builder. Already included and not needed when using the Divi or Extra theme.
+ * Version: 2.26.4
  * Author: Elegant Themes
  * Author URI: http://elegantthemes.com
  * License: GPLv2 or later
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'ET_BUILDER_PLUGIN_DIR', trailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'ET_BUILDER_PLUGIN_URI', plugins_url('', __FILE__) );
-define( 'ET_BUILDER_PLUGIN_VERSION', '2.21.2' );
+define( 'ET_BUILDER_PLUGIN_VERSION', '2.26.4' );
 
 if ( ! class_exists( 'ET_Dashboard_v2' ) ) {
 	require_once( ET_BUILDER_PLUGIN_DIR . 'dashboard/dashboard.php' );
@@ -158,6 +158,14 @@ class ET_Builder_Plugin extends ET_Dashboard_v2 {
 		et_pb_register_posttypes();
 
 		add_action( 'admin_menu', array( $this, 'add_divi_menu' ));
+		
+		// Check if the plugin was just activated and call for the et_builder_prepare_bfb().
+		if ( 'activated' === get_option( 'et_pb_builder_plugin_status', '' ) ) {
+			et_builder_prepare_bfb();
+			// Delete cached definitions / helpers
+			et_fb_delete_builder_assets();
+			delete_option( 'et_pb_builder_plugin_status' );
+		}
 	}
 
 	function add_divi_menu() {
@@ -406,3 +414,61 @@ function et_dbp_body_class_backwards_compatibility( $classes ) {
 }
 add_filter( 'body_class', 'et_dbp_body_class_backwards_compatibility' );
 endif;
+
+/**
+ * Set the plugin activated flag to use it later when needed.
+ */
+function et_builder_set_plugin_activated_flag() {
+	update_option( 'et_pb_builder_plugin_status', 'activated' );
+}
+register_activation_hook( __FILE__, 'et_builder_set_plugin_activated_flag' );
+
+/**
+ * Auto-deactivate Divi Builder Plugin if the active/parent theme uses Builder
+ *
+ * @since ??
+ */
+function et_divi_builder_deactivate_if_theme_uses_builder() {
+	// Don't do anything if the user isn't logged in
+	if ( ! is_user_logged_in() ) {
+		return;
+	}
+
+	$current_template = esc_attr( get_option( 'template' ) );
+
+	// Check whether the active (or parent) theme is Divi or Extra
+	if ( ! in_array( $current_template, array( 'Divi', 'Extra' ) ) ) {
+		return;
+	}
+
+	if ( current_user_can( 'activate_plugins' ) ) {
+		add_action( 'admin_init', 'et_divi_builder_auto_deactivate' );
+		add_action( 'admin_notices', 'et_divi_builder_auto_deactivate_notice' );
+	}
+}
+add_action( 'plugins_loaded', 'et_divi_builder_deactivate_if_theme_uses_builder' );
+
+/**
+ * Deactivate this plugin
+ *
+ * @since ??
+ */
+function et_divi_builder_auto_deactivate() {
+	deactivate_plugins( plugin_basename( __FILE__ ) );
+}
+
+/**
+ * Print a WP Admin notice when Divi Builder is deactivated
+ *
+ * @since ??
+ */
+function et_divi_builder_auto_deactivate_notice() {
+	$classes = 'notice notice-warning is-dismissible';
+	$message = __( 'Your theme already includes the Divi Builder, so the Divi Builder plugin has been deactivated. It is not needed when using the Divi or Extra theme.', 'et_builder' );
+
+	printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $classes ), esc_html( $message ) );
+
+	if ( isset( $_GET['activate'] ) ) {
+		unset( $_GET['activate'] );
+	}
+}

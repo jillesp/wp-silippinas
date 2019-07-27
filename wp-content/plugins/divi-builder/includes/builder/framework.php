@@ -4,7 +4,10 @@ require_once ET_BUILDER_DIR . 'core.php';
 require_once ET_BUILDER_DIR . 'feature/ClassicEditor.php';
 require_once ET_BUILDER_DIR . 'feature/post-content.php';
 require_once ET_BUILDER_DIR . 'feature/dynamic-content.php';
+require_once ET_BUILDER_DIR . 'feature/ErrorReport.php';
 require_once ET_BUILDER_DIR . 'api/DiviExtensions.php';
+require_once ET_BUILDER_DIR . 'feature/custom-defaults/Settings.php';
+require_once ET_BUILDER_DIR . 'feature/custom-defaults/History.php';
 
 if ( wp_doing_ajax() && ! is_customize_preview() ) {
 	define( 'WPE_HEARTBEAT_INTERVAL', et_builder_heartbeat_interval() );
@@ -46,6 +49,15 @@ if ( wp_doing_ajax() && ! is_customize_preview() ) {
 			'et_builder_resolve_post_content',
 			'et_builder_activate_bfb_auto_draft',
 			'et_builder_toggle_bfb',
+			'et_fb_error_report',
+			'et_core_portability_import',
+			'et_core_version_rollback',
+			'update-theme',
+			'et_core_portability_export',
+			'et_core_portability_import',
+			'et_builder_migrate_module_customizer_phase_two',
+			'et_builder_save_custom_defaults_history',
+			'et_builder_retrieve_custom_defaults_history',
 		),
 	);
 
@@ -538,6 +550,9 @@ add_filter( 'body_class', 'et_builder_body_classes' );
 
 if ( ! function_exists( 'et_builder_add_main_elements' ) ) :
 function et_builder_add_main_elements() {
+	if ( ET_BUILDER_CACHE_MODULES ) {
+		ET_Builder_Element::init_cache();
+	}
 	require_once ET_BUILDER_DIR . 'main-structure-elements.php';
 	require_once ET_BUILDER_DIR . 'main-modules.php';
 	do_action( 'et_builder_ready' );

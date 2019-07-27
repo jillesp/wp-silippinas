@@ -480,9 +480,14 @@ add_action( 'et_builder_toggle_bfb', 'dbp_action_toggle_bfb' );
  *
  * @return bool
  */
-function dbp_filter_show_bfb_optin_modal( $default ) {
+function dbp_filter_show_bfb_optin_modal( $default = false ) {
 	$options = get_option( 'et_pb_builder_options', array() );
 	$shown = isset( $options['bfb_optin_modal_shown'] ) ? $options['bfb_optin_modal_shown'] : $default;
+
+	// Don't show the optin modal if no BB activated or BFB already activated
+	if ( ! et_pb_is_pagebuilder_used() || et_builder_bfb_enabled() ) {
+		return false;
+	}
 
 	if ( is_bool( $shown ) ) {
 		return $shown;
