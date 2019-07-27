@@ -1848,24 +1848,23 @@ if ( ! function_exists( 'et_builder_include_capitals_option' ) ) :
 		$cats_array = get_terms( $args['term_name'], $term_args );
 		$cats_array = array_merge( $custom_items, $cats_array );
 	
-		$output .= '<select name="{$args["field_name"]}" id="{$args["field_name"]}"><option> Unset </option>';
+		$output .= '<select name="et_pb_include_capitals" id="et_pb_include_capitals">';
 
-		foreach ( $cats_array as $cat ) {
+		foreach ( $cats_array as $capital ) {
 			$selected = sprintf(
-				'<%%= typeof( $args["field_name"] ) !== "undefined" && "%1$s" == $args["field_name"] ?  " selected=\'selected\'" : "" %%>',
-				esc_html( $cat->term_id )
+				'<%%= typeof( et_pb_include_capitals ) !== "undefined" && "%1$s" == et_pb_include_capitals ?  " selected=\'selected\'" : "" %%>',
+				esc_html( $capital->term_id )
 			);
 	
 			$output .= sprintf(
 				'<option value="%1$s"%3$s> %2$s</option>',
-				esc_html( $cat->term_id ),
-				esc_html( $cat->name ),
+				esc_html( $capital->term_id ),
+				esc_html( $capital->name ),
 				$selected
 			);
 		}
 	
 		$output .= '</select>';
-
 		return apply_filters( 'et_builder_include_capitals_option_html', $output );
 
 	}
@@ -1909,25 +1908,24 @@ if ( ! function_exists( 'et_builder_include_municipals_option' ) ) :
 			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
 		}
 	
-		// $output .= '<select name="{$args["field_name"]}" id="{$args["field_name"]}">';
+		$output .= '<select name="et_pb_include_municipals" id="et_pb_include_municipals">';
 
-		// foreach ( $cats_array as $cat ) {
-		// 	$selected = sprintf(
-		// 		'<%%= typeof( $args["field_name"] ) !== "undefined" && "%1$s" == $args["field_name"] ?  " selected=\'selected\'" : "" %%>',
-		// 		esc_html( $cat->term_id )
-		// 	);
+		foreach ( $cats_array as $municipal ) {
+			$selected = sprintf(
+				'<%%= typeof( et_pb_include_municipals ) !== "undefined" && "%1$s" == et_pb_include_municipals ?  " selected=\'selected\'" : "" %%>',
+				esc_html( $municipal->term_id )
+			);
 	
-		// 	$output .= sprintf(
-		// 		'<option value="%1$s"%3$s> %2$s</option>',
-		// 		esc_html( $cat->term_id ),
-		// 		esc_html( $cat->name ),
-		// 		$selected
-		// 	);
-		// }
+			$output .= sprintf(
+				'<option value="%1$s"%3$s> %2$s</option>',
+				esc_html( $municipal->term_id ),
+				esc_html( $municipal->name ),
+				$selected
+			);
+		}
 	
-		// $output .= '</select>';
-	
-		// return apply_filters( 'et_builder_include_municipals_option_html', $output );
+		$output .= '</select>';
+		return apply_filters( 'et_builder_include_municipals_option_html', $output );
 	}
 	endif;
 
@@ -1969,25 +1967,24 @@ if ( ! function_exists( 'et_builder_include_barangays_option' ) ) :
 			$output = sprintf( '<p>%1$s</p>', esc_html( $labels->not_found ) );
 		}
 	
-		// $output .= '<select name="{$args["field_name"]}" id="{$args["field_name"]}">';
+		$output .= '<select name="et_pb_include_barangays" id="et_pb_include_barangays">';
 
-		// foreach ( $cats_array as $cat ) {
-		// 	$selected = sprintf(
-		// 		'<%%= typeof( $args["field_name"] ) !== "undefined" && "%1$s" == $args["field_name"] ?  " selected=\'selected\'" : "" %%>',
-		// 		esc_html( $cat->term_id )
-		// 	);
+		foreach ( $cats_array as $barangay ) {
+			$selected = sprintf(
+				'<%%= typeof( et_pb_include_barangays ) !== "undefined" && "%1$s" == et_pb_include_barangays ?  " selected=\'selected\'" : "" %%>',
+				esc_html( $barangay->term_id )
+			);
 	
-		// 	$output .= sprintf(
-		// 		'<option value="%1$s"%3$s> %2$s</option>',
-		// 		esc_html( $cat->term_id ),
-		// 		esc_html( $cat->name ),
-		// 		$selected
-		// 	);
-		// }
+			$output .= sprintf(
+				'<option value="%1$s"%3$s> %2$s</option>',
+				esc_html( $barangay->term_id ),
+				esc_html( $barangay->name ),
+				$selected
+			);
+		}
 	
-		// $output .= '</select>';
-	
-		// return apply_filters( 'et_builder_include_barangays_option_html', $output );
+		$output .= '</select>';
+		return apply_filters( 'et_builder_include_barangays_option_html', $output );
 	}
 	endif;
 
